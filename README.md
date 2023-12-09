@@ -24,6 +24,7 @@
 1. 스크립트에서 SPlugin.SCommand.Register 함수를 이용하여 사용자 정의 명령어를 등록합니다
 2. SConsole 에디터의 CommandView 에서 등록된 사용자 정의 명령어를 확인 가능합니다.
 3. 사용자 정의 명령어의 값을 변경합니다.
+
 <img src="Documentation~/Images%2Fregister_commands_code.png" width="600" height="250">
 <img src="Documentation~/Images%2Fapply_commands_to_remote_app.gif">
 
@@ -37,6 +38,7 @@
 * SPlugin.SDebug 이용
     1. 스크립트에서 SPlugin.SDebug.Log 함수를 이용하여 로그를 작성합니다.
     2. SConsole 에디터의 LogView에서 로그 확인이 가능합니다.
+       
 <img src="Documentation~/Images%2Flog_code.png" width="600" height="300">
 <img src="Documentation~/Images%2Fshow_log_from_remote_app.gif">
 
@@ -46,7 +48,9 @@
 * Search 를 이용하여 로그 찾기
 * Exclude 를 이용하여 로그 제외하기
 * QuickSearch 를 이용하여 로그 찾기
->![quick_search.gif](Documentation~/Images%2Fquick_search.gif)
+  
+![quick_search.gif](Documentation~/Images%2Fquick_search.gif)
+
 - - -
 
 ###  Pause, Step
@@ -62,7 +66,7 @@
 * 로컬 네트워크의 사설 IP 또는 공인 IP 를 이용하여 앱 연결
     1. SConsole 에디터의 ApplicationView 에서 **로컬 네트워크의 사설 IP** 또는 **공인 IP**를 입력합니다.
     2. Connect 버튼을 눌러 연결 합니다
-       
+
 ![connect_to_remote_app.gif](Documentation~/Images%2Fconnect_to_remote_app.gif)
 - - -
 
@@ -76,12 +80,26 @@
 ## Getting started
 1. SRemoteConsole 설치
     1. 유니티 에디터에서 `Window/Package Manager` 를 클릭 합니다.
+       
+       ![select_package_manager.png](Documentation%7E%2FImages%2Finstall%2Fselect_package_manager.png)
+       
     2. Package Manager 의 왼쪽 상단 `+` 버튼을 클릭하고 `Add package from git URL...` 을 선택합니다.
+       
+       ![select_add_menu_with_git.png](Documentation%7E%2FImages%2Finstall%2Fselect_add_menu_with_git.png)
+       
     3. SRemoteConsole 패키지의 git 주소를 입력 합니다.
+       
        `https://github.com/hope1026/unity_s_remote_console_package.git`
+       
     4. `Add` 버튼을 클릭하면 패키지가 설치 됩니다.
+       
+       ![add_git_url.png](Documentation%7E%2FImages%2Finstall%2Fadd_git_url.png)
+       
 2. SRemoteConsole 실행
-    1. 유니티 에디터에서 `Window/SPlugin/SConsole` 를 클릭 합니다.
-3. 스크립트에 로그를 작성합니다
-    1. SPlugin.SDebug.Log("log");
-4. SConsole 에디터에서 로그를 확인 합니다.
+   1. 유니티 에디터에서 `Window/SPlugin/SConsole` 를 클릭 합니다.
+      
+      ![select_remote_console.png](Documentation%7E%2FImages%2Finstall%2Fselect_remote_console.png)
+
+   2. 스크립트에 로그를 작성합니다
+       - SPlugin.SDebug.Log("log");
+   3. SConsole 에디터에서 로그를 확인 합니다.

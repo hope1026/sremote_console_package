@@ -2,7 +2,6 @@
     "name": "SPlugin.RemoteConsole.Editor",
     "rootNamespace": "",
     "references": [
-        "SPlugin.Network",
         "SPlugin.RemoteConsole"
     ],
     "includePlatforms": [

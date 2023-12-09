@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using SPlugin.Network;
+using SPlugin.FrameWork.Network;
 using UnityEngine;
 using UnityEngine.Profiling;
 using Debug = UnityEngine.Debug;
