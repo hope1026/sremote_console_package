@@ -8,7 +8,7 @@
 
 - - -
 ## Introduction
-RemoteConsole 은 원격으로 전송 되는 로그를 통해 디버깅을 하고, 사용자 정의 명령어를 이용하여 개발 편의성을 높이는 강력한 툴입니다.
+[RemoteConsole 은 원격으로 전송 되는 로그를 통해 디버깅을 하고, 사용자 정의 명령어를 이용하여 개발 편의성을 높이는 강력한 툴입니다.](https://www.youtube.com/watch?v=Da6OSc6FiX8)
 * 유니티 **기본 콘솔의 모든 기능**을 지원합니다.
 * 빌드 된 앱과 **원격** 으로 연결되어 **사용자 정의 명령어** 를 실행합니다.
 * 빌드 된 앱과 **원격** 으로 연결되어 **로그** 를 확인할 수 있습니다.
@@ -16,32 +16,30 @@ RemoteConsole 은 원격으로 전송 되는 로그를 통해 디버깅을 하�
 * 로그 발생 시점의 **시간**, **프레임 카운트**, **오브젝트** 를 쉽게 확인 가능합니다.
 * 편리한 로그 **필터** 기능을 제공합니다.
 * 연결된 앱의 **시스템 정보** 및 간단한 **프로파일**(FPS, UsedHeap) 정보를 확인 가능합니다
->[![log_code.png](Documentation~/Images%2Fremote_console_thumbnail.png)](https://www.youtube.com/watch?v=Da6OSc6FiX8)
 
 - - -
 ## Features
 ### 사용자 정의 명령어
 플레이 중 각종 값을 변경 가능하며 테스트나 디버깅에 유용합니다.
 1. 스크립트에서 SPlugin.SCommand.Register 함수를 이용하여 사용자 정의 명령어를 등록합니다
-    * SPlugin.Command.Register(categoryName, commandName, defaultValue, onChangedValueDelegate, displayPriority, tooltip)
 2. SConsole 에디터의 CommandView 에서 등록된 사용자 정의 명령어를 확인 가능합니다.
 3. 사용자 정의 명령어의 값을 변경합니다.
->![register_commands_code.png](Documentation~/Images%2Fregister_commands_code.png)
->![apply_commands_to_remote_app.gif](Documentation~/Images%2Fapply_commands_to_remote_app.gif)
+<img src="Documentation~/Images%2Fregister_commands_code.png" width="600" height="250">
+<img src="Documentation~/Images%2Fapply_commands_to_remote_app.gif">
+
 - - - 
 
 ### 로그
 * UnityEngine.Debug 이용
     1. 스크립트에서 UnityEngine.Debug.Log 함수를 이용하여 로그를 작성합니다.
-        * UnityEngine.Debug.Log("log")
     2. SConsole 에디터의 Preferences 에서 Show UnityDebugLog 를 활성화 합니다.
     3. SConsole 에디터의 LogView에서 로그 확인이 가능합니다.
 * SPlugin.SDebug 이용
     1. 스크립트에서 SPlugin.SDebug.Log 함수를 이용하여 로그를 작성합니다.
-        * SPlugin.SDebug.Log("log")
     2. SConsole 에디터의 LogView에서 로그 확인이 가능합니다.
->![log_code.png](Documentation~/Images%2Flog_code.png)
->![show_log_from_remote_app.gif](Documentation~/Images%2Fshow_log_from_remote_app.gif)
+<img src="Documentation~/Images%2Flog_code.png" width="600" height="300">
+<img src="Documentation~/Images%2Fshow_log_from_remote_app.gif">
+
 - - -
 
 ### 편리한 필터 기능
@@ -53,7 +51,7 @@ RemoteConsole 은 원격으로 전송 되는 로그를 통해 디버깅을 하�
 
 ###  Pause, Step
 원격으로 연결된 앱에서 프레임 단위 플레이가 가능하여 디버깅에 도움이 됩니다.
->![remote_app_pause_and_step.gif](Documentation~/Images%2Fremote_app_pause_and_step.gif)
+![remote_app_pause_and_step.gif](Documentation~/Images%2Fremote_app_pause_and_step.gif)
 - - -
 
 ### 원격 접속
@@ -63,14 +61,16 @@ RemoteConsole 은 원격으로 전송 되는 로그를 통해 디버깅을 하�
     3. 앱을 선택 합니다.
 * 로컬 네트워크의 사설 IP 또는 공인 IP 를 이용하여 앱 연결
     1. SConsole 에디터의 ApplicationView 에서 **로컬 네트워크의 사설 IP** 또는 **공인 IP**를 입력합니다.
-    2. Connect 버튼을 눌러 연결 합니다*
->![connect_to_remote_app.gif](Documentation~/Images%2Fconnect_to_remote_app.gif)
+    2. Connect 버튼을 눌러 연결 합니다
+       
+![connect_to_remote_app.gif](Documentation~/Images%2Fconnect_to_remote_app.gif)
 - - -
 
 ### 시스템 및 프로파일 정보
 1. SConsole 에디터의 ApplicationView 에서 앱 리스트를 확인합니다.
 2. ShowInfo 버튼을 눌러 시스템 및 프로파일 정보를 확인합니다.
->![systeminfo.png](Documentation~/Images%2Fsysteminfo.png)
+
+![systeminfo.png](Documentation~/Images%2Fsysteminfo.png)
 - - -
 
 ## Getting started
