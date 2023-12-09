@@ -1,0 +1,31 @@
+{
+  "name": "com.splugin.remoteconsole",
+  "displayName": "SPluginRemoteConsole",
+  "version": "1.0.0",
+  "documentationUrl": "https://github.com/hope1026/unity_s_remote_console_package/blob/master/README.md",
+  "changelogUrl": "https://github.com/hope1026/unity_s_remote_console_package/blob/master/CHANGELOG.md",
+  "licensesUrl": "https://github.com/hope1026/unity_s_remote_console_package/blob/master/LICENSE.md",
+  "keywords": [
+    "SPlugin",
+    "Console",
+    "RemoteConsole"
+  ],
+  "samples": [
+    {
+      "displayName": "RemoteConsoleSample",
+      "description": "RemoteConsoleSample",
+      "path": "Samples~/RemoteConsoleSample"
+    }
+  ],
+  "author": {
+    "name": "Hanbyeol Lee",
+    "email": "hope841026@gmail.com",
+    "url": "https://github.com/hope1026/unity_s_remote_console_package"
+  },
+  
+  "dependencies": {
+    "com.splugin.network": "https://github.com/hope1026/unity_s_network_package.git"
+  },
+  "hideInEditor": false,
+  "description": "SPluginRemoteConsole is a powerful tool to supports debugging."
+}

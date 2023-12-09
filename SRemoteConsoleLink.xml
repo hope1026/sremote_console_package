@@ -1,0 +1,3 @@
+﻿<linker>
+    <assembly fullname="SPlugin" preserve="all"/>
+</linker>
