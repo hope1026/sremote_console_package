@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using SPlugin.Network;
+using SPlugin.FrameWork.Network;
 using UnityEngine;
 
 namespace SPlugin

@@ -2,7 +2,7 @@
 // Copyright 2015 https://github.com/hope1026
 
 using System;
-using SPlugin.Network;
+using SPlugin.FrameWork.Network;
 
 namespace SPlugin
 {
