@@ -18,13 +18,13 @@
     }
   ],
   "author": {
-    "name": "SPlugin",
+    "name": "Hanbyeol Lee",
     "email": "hope841026@gmail.com",
-    "url": "https://github.com/hope1026"
+    "url": "https://github.com/hope1026/unity_s_remote_console_package"
   },
   
   "dependencies": {
-    "com.splugin.network": "1.0.0"
+    "com.splugin.network": "https://github.com/hope1026/unity_s_network_package.git"
   },
   "hideInEditor": false,
   "description": "SPluginRemoteConsole is a powerful tool to supports debugging."
