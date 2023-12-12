@@ -35,7 +35,7 @@ namespace SPlugin
 
             const ConsoleEditorPrefsFlags DEFAULT_FLAGS = ConsoleEditorPrefsFlags.SHOW_LOG | ConsoleEditorPrefsFlags.SHOW_LOG | ConsoleEditorPrefsFlags.SHOW_WARNING |
                                                           ConsoleEditorPrefsFlags.SHOW_ERROR | ConsoleEditorPrefsFlags.SHOW_TIME | ConsoleEditorPrefsFlags.SHOW_FRAME_COUNT |
-                                                          ConsoleEditorPrefsFlags.SHOW_OBJECT_NAME | ConsoleEditorPrefsFlags.SHOW_FONT_EFFECT | ConsoleEditorPrefsFlags.SHOW_SYSTEM_MESSAGE;
+                                                          ConsoleEditorPrefsFlags.SHOW_OBJECT_NAME | ConsoleEditorPrefsFlags.SHOW_FONT_EFFECT | ConsoleEditorPrefsFlags.SHOW_UNITY_DEBUG_LOG;
             ConsoleEditorPrefs._consoleEditorPrefsFlags = (ConsoleEditorPrefsFlags)EditorPrefs.GetInt(ConsoleEditorPrefsIds.OPTION_FLAG, (int)DEFAULT_FLAGS);
             ConsoleEditorPrefs._consoleEditorPrefsFlags |= ConsoleEditorPrefsFlags.SHOW_FONT_EFFECT;
             ConsoleEditorPrefs._consoleEditorPrefsFlags |= ConsoleEditorPrefsFlags.SHOW_SYSTEM_MESSAGE;

@@ -8,8 +8,9 @@ namespace SPlugin
     public static class SCommand
     {
         public static bool Register(string categoryName_, string commandName_, bool defaultValue_, Action<bool> onChangedValueDelegate_,
-                                        int displayPriority_ = CommandAbstract.DEFAULT_DISPLAY_PRIORITY, string tooltip_ = "")
+                                    int displayPriority_ = CommandAbstract.DEFAULT_DISPLAY_PRIORITY, string tooltip_ = "")
         {
+#if !DISABLE_SREMOTE_CONSOLE
             if (string.IsNullOrEmpty(categoryName_) || string.IsNullOrEmpty(commandName_) || onChangedValueDelegate_ == null)
                 return false;
 
@@ -17,11 +18,15 @@ namespace SPlugin
             command.SetDisplayPriority(displayPriority_);
             command.SetToolTip(tooltip_);
             return SDebug.ConsoleMain.TryAddCommand(command);
+#else
+            return false;
+#endif
         }
 
         public static bool Register(string categoryName_, string commandName_, int defaultValue_, Action<int> onChangedValueDelegate_,
-                                       int displayPriority_ = CommandAbstract.DEFAULT_DISPLAY_PRIORITY, string tooltip_ = "")
+                                    int displayPriority_ = CommandAbstract.DEFAULT_DISPLAY_PRIORITY, string tooltip_ = "")
         {
+#if !DISABLE_SREMOTE_CONSOLE
             if (string.IsNullOrEmpty(categoryName_) || string.IsNullOrEmpty(commandName_) || onChangedValueDelegate_ == null)
                 return false;
 
@@ -29,11 +34,15 @@ namespace SPlugin
             command.SetDisplayPriority(displayPriority_);
             command.SetToolTip(tooltip_);
             return SDebug.ConsoleMain.TryAddCommand(command);
+#else
+            return false;
+#endif
         }
 
         public static bool Register(string categoryName_, string commandName_, long defaultValue_, Action<long> onChangedValueDelegate_,
-                                        int displayPriority_ = CommandAbstract.DEFAULT_DISPLAY_PRIORITY, string tooltip_ = "")
+                                    int displayPriority_ = CommandAbstract.DEFAULT_DISPLAY_PRIORITY, string tooltip_ = "")
         {
+#if !DISABLE_SREMOTE_CONSOLE
             if (string.IsNullOrEmpty(categoryName_) || string.IsNullOrEmpty(commandName_) || onChangedValueDelegate_ == null)
                 return false;
 
@@ -41,11 +50,15 @@ namespace SPlugin
             command.SetDisplayPriority(displayPriority_);
             command.SetToolTip(tooltip_);
             return SDebug.ConsoleMain.TryAddCommand(command);
+#else
+            return false;
+#endif
         }
 
         public static bool Register(string categoryName_, string commandName_, float defaultValue_, Action<float> onChangedValueDelegate_,
-                                         int displayPriority_ = CommandAbstract.DEFAULT_DISPLAY_PRIORITY, string tooltip_ = "")
+                                    int displayPriority_ = CommandAbstract.DEFAULT_DISPLAY_PRIORITY, string tooltip_ = "")
         {
+#if !DISABLE_SREMOTE_CONSOLE
             if (string.IsNullOrEmpty(categoryName_) || string.IsNullOrEmpty(commandName_) || onChangedValueDelegate_ == null)
                 return false;
 
@@ -53,11 +66,15 @@ namespace SPlugin
             command.SetDisplayPriority(displayPriority_);
             command.SetToolTip(tooltip_);
             return SDebug.ConsoleMain.TryAddCommand(command);
+#else
+            return false;
+#endif
         }
 
         public static bool Register(string categoryName_, string commandName_, double defaultValue_, Action<double> onChangedValueDelegate_,
-                                          int displayPriority_ = CommandAbstract.DEFAULT_DISPLAY_PRIORITY, string tooltip_ = "")
+                                    int displayPriority_ = CommandAbstract.DEFAULT_DISPLAY_PRIORITY, string tooltip_ = "")
         {
+#if !DISABLE_SREMOTE_CONSOLE
             if (string.IsNullOrEmpty(categoryName_) || string.IsNullOrEmpty(commandName_) || onChangedValueDelegate_ == null)
                 return false;
 
@@ -65,11 +82,15 @@ namespace SPlugin
             command.SetDisplayPriority(displayPriority_);
             command.SetToolTip(tooltip_);
             return SDebug.ConsoleMain.TryAddCommand(command);
+#else
+            return false;
+#endif
         }
 
         public static bool Register(string categoryName_, string commandName_, string defaultValue_, Action<string> onChangedValueDelegate_,
-                                          int displayPriority_ = CommandAbstract.DEFAULT_DISPLAY_PRIORITY, string tooltip_ = "")
+                                    int displayPriority_ = CommandAbstract.DEFAULT_DISPLAY_PRIORITY, string tooltip_ = "")
         {
+#if !DISABLE_SREMOTE_CONSOLE
             if (string.IsNullOrEmpty(categoryName_) || string.IsNullOrEmpty(commandName_) || onChangedValueDelegate_ == null)
                 return false;
 
@@ -77,6 +98,9 @@ namespace SPlugin
             command.SetDisplayPriority(displayPriority_);
             command.SetToolTip(tooltip_);
             return SDebug.ConsoleMain.TryAddCommand(command);
+#else
+            return false;
+#endif
         }
     }
 }
