@@ -44,7 +44,9 @@ namespace SPlugin
 
         public void RegisterUpdateInEditorDelegate()
         {
+#if !DISABLE_SREMOTE_CONSOLE
             _updateInEditorDelegate = SDebug.ConsoleMain.UpdateCustom;
+#endif
         }
 
         public void UnRegisterUpdateInEditorDelegate()
@@ -54,7 +56,9 @@ namespace SPlugin
 
         public void OnStartInEditor()
         {
+#if !DISABLE_SREMOTE_CONSOLE
             SDebug.ConsoleMain.OnStartIfLocalEditor();
+#endif
         }
     }
 }

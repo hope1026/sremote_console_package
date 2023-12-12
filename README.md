@@ -1,105 +1,113 @@
 # SPlugin Remote Console for Unity
-
+[한국어](Documentation%7E%2FREADME_KR.md)
 - - -
 ## Table of contents
 * [Introduction](#introduction)
 * [Features](#features)
 * [Getting started](#getting-started)
+* [Disable SRemoteConsole](#disable-sremoteconsole)
 
 - - -
 ## Introduction
-[RemoteConsole 은 원격으로 전송 되는 로그를 통해 디버깅을 하고, 사용자 정의 명령어를 이용하여 개발 편의성을 높이는 강력한 툴입니다.](https://www.youtube.com/watch?v=Da6OSc6FiX8)
-* 유니티 **기본 콘솔의 모든 기능**을 지원합니다.
-* 빌드 된 앱과 **원격** 으로 연결되어 **사용자 정의 명령어** 를 실행합니다.
-* 빌드 된 앱과 **원격** 으로 연결되어 **로그** 를 확인할 수 있습니다.
-* **원격** 으로 연결 된 앱에 **Pause, Step** 기능을 이용하여, 프레임 단위 실행이 가능합니다.
-* 로그 발생 시점의 **시간**, **프레임 카운트**, **오브젝트** 를 쉽게 확인 가능합니다.
-* 편리한 로그 **필터** 기능을 제공합니다.
-* 연결된 앱의 **시스템 정보** 및 간단한 **프로파일**(FPS, UsedHeap) 정보를 확인 가능합니다
+[RemoteConsole is a powerful tool for debugging with remotely sent logs and custom commands to facilitate development.](https://www.youtube.com/watch?v=Da6OSc6FiX8)
+* Supports all features of the Unity **native console**.
+* Connects **remotely** to the built app to execute **customized commands**.
+* Connects **remotely** to built apps to show their **logs**.
+* Remotely connected app can be executed frame by frame by using the **Pause, Step** feature.
+* You can easily show the time, frame count, and object at the time of log generation.
+* Provides a convenient log filter feature.
+* System information and simple profile information (FPS, UsedHeap) of connected apps can be viewed.
 
 - - -
 ## Features
-### 사용자 정의 명령어
-플레이 중 각종 값을 변경 가능하며 테스트나 디버깅에 유용합니다.
-1. 스크립트에서 SPlugin.SCommand.Register 함수를 이용하여 사용자 정의 명령어를 등록합니다
-2. SConsole 에디터의 CommandView 에서 등록된 사용자 정의 명령어를 확인 가능합니다.
-3. 사용자 정의 명령어의 값을 변경합니다.
+### Custom commands
+Custom command values can be change during play and are useful for testing and debugging.
+1. Use the SPlugin.SCommand.Register function in your script to register the custom command.
+2. You can find registered commands in CommandView of SConsoleEditor.
+3. Change the value of the custom command.
 
 <img src="Documentation~/Images%2Fregister_commands_code.png" width="600" height="250">
 <img src="Documentation~/Images%2Fapply_commands_to_remote_app.gif">
 
 - - - 
 
-### 로그
-* UnityEngine.Debug 이용
-    1. 스크립트에서 UnityEngine.Debug.Log 함수를 이용하여 로그를 작성합니다.
-    2. SConsole 에디터의 Preferences 에서 Show UnityDebugLog 를 활성화 합니다.
-    3. SConsole 에디터의 LogView에서 로그 확인이 가능합니다.
-* SPlugin.SDebug 이용
-    1. 스크립트에서 SPlugin.SDebug.Log 함수를 이용하여 로그를 작성합니다.
-    2. SConsole 에디터의 LogView에서 로그 확인이 가능합니다.
+### Log
+* Using UnityEngine.Debug
+    1. Use the UnityEngine.Debug.Log function in your script to write a log.
+    2. Enable `ShowUnityDebLog` in SConsoleEditor's preferences.
+    3. You can view the logs in SConsoleEditor's LogView.
+* Using SPlugin.SDebug
+    1. Use the SPlugin.SDebug.Log function in your script to write a log.
+    2. You can view the logs in SConsoleEditor's LogView.
        
 <img src="Documentation~/Images%2Flog_code.png" width="600" height="300">
 <img src="Documentation~/Images%2Fshow_log_from_remote_app.gif">
 
 - - -
 
-### 편리한 필터 기능
-* Search 를 이용하여 로그 찾기
-* Exclude 를 이용하여 로그 제외하기
-* QuickSearch 를 이용하여 로그 찾기
+### Convenient filter features
+* Find logs using SearchField.
+* Exclude logs using search ExcludeField.
+* Find logs using QuickSearch feature.
   
 ![quick_search.gif](Documentation~/Images%2Fquick_search.gif)
 
 - - -
 
-###  Pause, Step
-원격으로 연결된 앱에서 프레임 단위 플레이가 가능하여 디버깅에 도움이 됩니다.
+### Pause, Step
+Frame-by-frame play and pause are possible in remotely connected apps, which helps with debugging.
 ![remote_app_pause_and_step.gif](Documentation~/Images%2Fremote_app_pause_and_step.gif)
 - - -
 
-### 원격 접속
-* 로컬 네트워크에서 접속 가능한 앱을 찾아 연결
-    1. SConsole 에디터의 ApplicationView 에서 접속이 가능한 앱을 찾습니다.
-    2. 연결 가능한 앱이 있을 경우 리스트에 등록 됩니다.
-    3. 앱을 선택 합니다.
-* 로컬 네트워크의 사설 IP 또는 공인 IP 를 이용하여 앱 연결
-    1. SConsole 에디터의 ApplicationView 에서 **로컬 네트워크의 사설 IP** 또는 **공인 IP**를 입력합니다.
-    2. Connect 버튼을 눌러 연결 합니다
+### Remote Connections
+* Find and connect to an accessible app on your local network
+    1. In the ApplicationView of the SConsoleEditor, look for apps that can be connected.
+    2. If an app is available, it will be registered in the list.
+    3. Select an app.
+* Connect the app using a private IP or public IP on the local network
+    1. Enter the **public IP** or **private IP of the local network** in ApplicationView of the SConsoleEditor.
+    2. Click the Connect button to connect.
 
 ![connect_to_remote_app.gif](Documentation~/Images%2Fconnect_to_remote_app.gif)
 - - -
 
-### 시스템 및 프로파일 정보
-1. SConsole 에디터의 ApplicationView 에서 앱 리스트를 확인합니다.
-2. ShowInfo 버튼을 눌러 시스템 및 프로파일 정보를 확인합니다.
+### SystemInfo
+1. Look at the app list in ApplicationView of SConsoleEditor..
+2. Click the ShowInfo button to view system and profile information..
 
 ![systeminfo.png](Documentation~/Images%2Fsysteminfo.png)
 - - -
 
 ## Getting started
-1. SRemoteConsole 설치
-    1. 유니티 에디터에서 `Window/Package Manager` 를 클릭 합니다.
+1. Install the SRemoteConsole package
+    1. Select `Window/Package` Manager in the menu bar.
        
        ![select_package_manager.png](Documentation%7E%2FImages%2Finstall%2Fselect_package_manager.png)
        
-    2. Package Manager 의 왼쪽 상단 `+` 버튼을 클릭하고 `Add package from git URL...` 을 선택합니다.
+    2. Click `+` button at the top left of the window, and select `Add package from git URL...`
        
        ![select_add_menu_with_git.png](Documentation%7E%2FImages%2Finstall%2Fselect_add_menu_with_git.png)
        
-    3. SRemoteConsole 패키지의 git 주소를 입력 합니다.
+    3. Enter the string below to the input field.
        
        `https://github.com/hope1026/unity_s_remote_console_package.git`
        
-    4. `Add` 버튼을 클릭하면 패키지가 설치 됩니다.
+    4. Click `Add` button, and will start install the package.
        
        ![add_git_url.png](Documentation%7E%2FImages%2Finstall%2Fadd_git_url.png)
        
-2. SRemoteConsole 실행
-   1. 유니티 에디터에서 `Window/SPlugin/SConsole` 를 클릭 합니다.
+2. Run SRemoteConsole
+   1. Select `Window/SPlugin/SConsole` in the menu bar.
       
       ![select_remote_console.png](Documentation%7E%2FImages%2Finstall%2Fselect_remote_console.png)
 
-   2. 스크립트에 로그를 작성합니다
+   2. Write logs to the script.
        - SPlugin.SDebug.Log("log");
-   3. SConsole 에디터에서 로그를 확인 합니다.
+   3. Find the log in SConsoleEditor.
+
+- - -
+## Disable SRemoteConsole
+* You can disable it by adding **DISABLE_SREMOTE_CONSOLE** to Project Settings -> Player -> Scripting Define Symbols.
+  * SRemoteConsole runs in the editor, but does not run in runtime, so it can be useful when distributing a release.
+
+  ![disable_sremote_console_define.png](Documentation%7E%2FImages%2Fdisable_sremote_console_define.png)
