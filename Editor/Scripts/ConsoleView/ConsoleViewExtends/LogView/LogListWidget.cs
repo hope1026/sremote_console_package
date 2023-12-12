@@ -397,8 +397,6 @@ namespace SPlugin
                 const string OPENER_EXE = "UnityVS.OpenFile.exe";
 
                 string openerName = EditorPrefs.GetString(OPENER_KEY);
-                openerName = openerName.Replace('/', '\\');
-                filePath_ = filePath_.Replace('/', '\\');
                 if (false == openerName.EndsWith(OPENER_EXE))
                 {
                     InternalEditorUtility.OpenFileAtLineExternal(filePath_, lineNumber_, 0);
@@ -409,7 +407,7 @@ namespace SPlugin
                     startInfo.UseShellExecute = false;
                     startInfo.CreateNoWindow = true;
                     startInfo.Arguments = (filePath_ + " " + (lineNumber_ - 1)).ToString(CultureInfo.InvariantCulture);
-                    startInfo.FileName = openerName.Replace('/', '\\');
+                    startInfo.FileName = openerName;
                     Process.Start(startInfo);
                 }
             }
