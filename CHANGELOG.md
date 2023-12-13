@@ -1,7 +1,7 @@
 # Change Log
 ***
 
-## 1.0.0(Dec 25, 2023)
+## 3.0.0(Dec 14, 2023)
 ### Features
 * Remote and Local log system.
 * Remote and Local command system.

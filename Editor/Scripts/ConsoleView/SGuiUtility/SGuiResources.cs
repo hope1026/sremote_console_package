@@ -51,7 +51,14 @@ namespace SPlugin
             if (null != instanceTexture_)
                 return instanceTexture_;
 
-            instanceTexture_ = AssetDatabase.LoadAssetAtPath<Texture2D>($"Packages/com.splugin.remoteconsole/Editor/Resources/Textures/{imageFileName_}");
+            string assetPath = $"Packages/com.splugin.remoteconsole/Editor/Resources/Textures/{imageFileName_}";
+            instanceTexture_ = AssetDatabase.LoadAssetAtPath<Texture2D>(assetPath);
+            if (instanceTexture_ == null)
+            {
+                assetPath = $"Assets/{assetPath}";
+                instanceTexture_ = AssetDatabase.LoadAssetAtPath<Texture2D>(assetPath);
+            }
+            
             if (instanceTexture_ != null && true == imageFileName_.Equals(SPLUGIN_TITLE_ICON_PATH, StringComparison.OrdinalIgnoreCase))
             {
                 SConsoleEditorWindow.ResetTitleIcon(instanceTexture_);
