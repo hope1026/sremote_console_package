@@ -24,31 +24,23 @@ public class SRemoteConsoleSampleMain : MonoBehaviour
         GUI.skin.button.fontSize = 35;
         GUILayout.BeginVertical();
         GUILayout.Space(100f);
-        GUILayoutOption width = GUILayout.Width(300f);
-        GUILayoutOption height = GUILayout.Height(100f);
+        GUILayoutOption width = GUILayout.Width(350f);
+        GUILayoutOption height = GUILayout.Height(150f);
 
         if (true == GUILayout.Button("Write Log", GUI.skin.button, width, height))
-        {
             SDebug.Log("SPlugin.SDebug.Log function was called.", this);
-        }
 
         GUILayout.Space(20f);
         if (true == GUILayout.Button("Write Warning", GUI.skin.button, width, height))
-        {
             SDebug.LogWarning("SPlugin.SDebug.LogWarning function was called.", this);
-        }
 
         GUILayout.Space(20f);
         if (true == GUILayout.Button("Write Error", GUI.skin.button, width, height))
-        {
             SDebug.LogError("SPlugin.SDebug.LogError function was called.", this);
-        }
 
         GUILayout.Space(20f);
         if (true == GUILayout.Button("Write UnityLog", GUI.skin.button, width, height))
-        {
             Debug.Log("UnityEngine.Debug.Log function was called.");
-        }
 
         GUILayout.EndVertical();
     }
