@@ -197,5 +197,15 @@ namespace SPlugin
                 _consoleEditorWindow.ShowNotification(new GUIContent(message_), 2f);
             }
         }
+
+        public string GetEditorWindowName()
+        {
+            if (_consoleEditorWindow != null)
+            {
+                return _consoleEditorWindow.name;
+            }
+
+            return string.Empty;
+        }
     }
 }

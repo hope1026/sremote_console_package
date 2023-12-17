@@ -2,8 +2,6 @@
 // Copyright 2015 https://github.com/hope1026
 
 using UnityEditor;
-using UnityEngine;
-using Application = UnityEngine.Device.Application;
 
 namespace SPlugin
 {
@@ -11,6 +9,8 @@ namespace SPlugin
     {
         public override bool IsLocalEditor => true;
         private bool _isPlaying = false;
+        private bool _isPaused = false;
+        private bool _canStep = false;
 
         public void Initialize()
         {
@@ -45,6 +45,17 @@ namespace SPlugin
                 RemoteConsoleLocalEditorBridge.Instance.PacketsForEditor.Clear();
             }
             ProcessAllReceivedPackets();
+
+            if (_isPaused != EditorApplication.isPaused)
+            {
+                EditorApplication.isPaused = _isPaused;
+            }
+
+            if (_canStep)
+            {
+                _canStep = false;
+                EditorApplication.Step();
+            }
         }
 
         protected override void SendPacket(PacketAbstract packet_)
@@ -54,9 +65,8 @@ namespace SPlugin
                 RemoteConsoleLocalEditorBridge.Instance.SendToApplication(packet_);
                 if (packet_ is PausePlayingPacket pausePlayingPacket && IsActivated)
                 {
-                    EditorApplication.isPaused = pausePlayingPacket.IsPause;
-                    if (pausePlayingPacket.CanStep)
-                        EditorApplication.Step();
+                    _isPaused = pausePlayingPacket.IsPause;
+                    _canStep = pausePlayingPacket.CanStep;
                 }
             }
         }

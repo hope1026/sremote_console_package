@@ -156,11 +156,11 @@ namespace SPlugin
                 string tempString = $"[TYPE]{logLogItem_.LogType} [TIME]{logLogItem_.TimeSeconds} [FRAME_COUNT]{logLogItem_.FrameCount} [OBJECT_NAME]{logLogItem_.ObjectName}";
                 _streamWrite.WriteLine(tempString);
 
-                foreach (LogItem.Stack stack in logLogItem_.StackList)
+                foreach (LogItem.StackContext stack in logLogItem_.StackList)
                 {
-                    if (null != stack && false == string.IsNullOrEmpty(stack.StackString))
+                    if (null != stack && false == string.IsNullOrEmpty(stack.DisplayStackString))
                     {
-                        _streamWrite.WriteLine("[S]" + stack.StackString);
+                        _streamWrite.WriteLine("[S]" + stack.DisplayStackString);
                     }
                 }
 

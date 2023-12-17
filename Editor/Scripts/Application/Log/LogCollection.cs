@@ -213,8 +213,7 @@ namespace SPlugin
         {
             foreach (LogItem item in _filteredBufferList)
             {
-                if (targetLogItem_.LineNumber != item.LineNumber ||
-                    targetLogItem_.ColumnNumber != item.ColumnNumber)
+                if (targetLogItem_.LineNumber != item.LineNumber)
                     continue;
 
                 if (targetLogItem_.ObjectName.GetHashCode() != item.ObjectName.GetHashCode())

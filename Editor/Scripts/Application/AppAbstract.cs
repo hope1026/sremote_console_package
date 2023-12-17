@@ -140,7 +140,6 @@ namespace SPlugin
             LogItem logItem = new LogItem();
             logItem.LogType = logPacket_.context.LogType;
             logItem.LogData = logPacket_.context.LogString;
-            logItem.StackString = logPacket_.context.LogStackTrace;
             logItem.FrameCount = logPacket_.context.FrameCount;
             logItem.TimeSeconds = logPacket_.context.TimeSeconds;
             logItem.ObjectName = logPacket_.context.ObjectName;
