@@ -16,7 +16,7 @@ internal class ExtendLogEditorWindow : EditorWindow
     {
         OnGuiSearchBar();
         _scrollPos = GUILayout.BeginScrollView(_scrollPos);
-
+        
         if (null != _selectedLogItemData)
         {
             string tempString = _selectedLogItemData.LogData;
@@ -46,10 +46,11 @@ internal class ExtendLogEditorWindow : EditorWindow
                 }
             }
 
-            SGuiStyle.LabelStyle.alignment = TextAnchor.UpperLeft;
-            SGuiStyle.LabelStyle.wordWrap = true;
+            SGuiStyle.StackTextStyle.alignment = TextAnchor.UpperLeft;
+            SGuiStyle.StackTextStyle.wordWrap = true;
 
-            GUILayout.Label(tempString, SGuiStyle.LabelStyle);
+            EditorGUILayout.SelectableLabel($"{tempString}\n{_selectedLogItemData.StackString}", 
+                                            SGuiStyle.StackTextStyle, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
         }
 
         GUILayout.EndScrollView();

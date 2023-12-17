@@ -23,6 +23,7 @@ namespace SPlugin
         private static GUIStyle _appListLabelStyle = null;
         private static GUIStyle _connectedAppAreaStyle = null;
         private static GUIStyle _disConnectedAppAreaStyle = null;
+        private static GUIStyle _stackTextStyle = null;
 
         public static GUIStyle LabelStyle { get { return InstanceStyle(ref _labelStyle, GUI.skin.label); } }
         public static GUIStyle ActiveAppLabelStyle { get { return InstanceStyle(ref _activeAppLabelStyle, GUI.skin.label); } }
@@ -35,6 +36,7 @@ namespace SPlugin
         public static GUIStyle MenuTapSelectedStyle { get { return InstanceStyle(ref _menuTapSelectedStyle, GUI.skin.button); } }
         public static GUIStyle HorizontalScrollbarThumbStyle { get { return InstanceStyle(ref _horizontalScrollbarThumbStyle, GUI.skin.horizontalScrollbarThumb); } }
         public static GUIStyle TextAreaStyle { get { return InstanceStyle(ref _textAreaStyle, GUI.skin.textArea); } }
+        public static GUIStyle StackTextStyle { get { return InstanceStyle(ref _stackTextStyle, GUI.skin.label); } }
         public static GUIStyle ConnectedAppAreaStyle { get { return InstanceStyle(ref _connectedAppAreaStyle, GUI.skin.textArea); } }
         public static GUIStyle DisConnectedAppAreaStyle { get { return InstanceStyle(ref _disConnectedAppAreaStyle, GUI.skin.textArea); } }
         public static GUIStyle ToggleStyle { get { return InstanceStyle(ref _toggleStyle, GUI.skin.toggle); } }
