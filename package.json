@@ -1,7 +1,7 @@
 {
   "name": "com.splugin.remoteconsole",
   "displayName": "SPluginRemoteConsole",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "documentationUrl": "https://github.com/hope1026/unity_s_remote_console_package/blob/master/README.md",
   "changelogUrl": "https://github.com/hope1026/unity_s_remote_console_package/blob/master/CHANGELOG.md",
   "licensesUrl": "https://github.com/hope1026/unity_s_remote_console_package/blob/master/LICENSE.md",

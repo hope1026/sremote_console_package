@@ -19,6 +19,7 @@ namespace SPlugin
     {
         private GameObject _consoleGameObject = null;
         private readonly Dictionary<string, CommandAbstract> _commandsByKey = new Dictionary<string, CommandAbstract>();
+        private readonly Queue<PacketAbstract> _packetQueue = new Queue<PacketAbstract>();
         private readonly SConsoleNetwork _consoleNetwork = new SConsoleNetwork();
         private readonly PreferencesContext _preferencesContext = new PreferencesContext();
         private readonly ProfileInfoContext _profileInfoContext = new ProfileInfoContext();
@@ -81,6 +82,10 @@ namespace SPlugin
             {
                 if (null != _consoleNetwork)
                 {
+                    while (0 < _packetQueue.Count)
+                    {
+                        _consoleNetwork.SendPacket(_packetQueue.Dequeue());
+                    }
                     _accumulateTimeSecondsForFrame += Time.unscaledDeltaTime;
                     _frameCount++;
                     _profileInfoContext.FramePerSecond = _frameCount / _accumulateTimeSecondsForFrame;
@@ -155,6 +160,7 @@ namespace SPlugin
                 }
                 else
                 {
+                    _packetQueue.Clear();
                     _pausePlayingContext.IsPause = false;
                 }
             }
@@ -276,27 +282,18 @@ namespace SPlugin
 
         public void SendLogException(Exception exception_, Object unityObject_)
         {
-            if (_consoleNetwork == null || _isSyncActivated == false)
-                return;
-
             StackTrace stackTrace = new StackTrace(fNeedFileInfo: true);
             SendLogPacket(LogType.Exception, exception_.Message, unityObject_, stackTrace);
         }
 
         public void SendLog(LogType logType_, string logMessage_, Object unityObject_)
         {
-            if (_consoleNetwork == null || _isSyncActivated == false)
-                return;
-
             StackTrace stackTrace = new StackTrace(fNeedFileInfo: true);
             SendLogPacket(logType_, logMessage_, unityObject_, stackTrace);
         }
 
         private void SendLogPacket(LogType logType_, string logMessage_, Object unityObject_, StackTrace stackTrace_)
         {
-            if (_consoleNetwork == null || _isSyncActivated == false)
-                return;
-
             LogPacket packet = new LogPacket();
             packet.context.LogType = logType_;
             packet.context.LogString = logMessage_;
@@ -311,7 +308,14 @@ namespace SPlugin
 
             BuildStackTrace(stackTrace_, ref packet.context);
 
-            _consoleNetwork.SendPacket(packet);
+            if (_consoleNetwork != null && _isSyncActivated == true)
+            {
+                _consoleNetwork.SendPacket(packet);
+            }
+            else
+            {
+                _packetQueue.Enqueue(packet);
+            }
 
             if (false == Application.isEditor && true == _pausePlayingContext.PauseWhenError)
             {
