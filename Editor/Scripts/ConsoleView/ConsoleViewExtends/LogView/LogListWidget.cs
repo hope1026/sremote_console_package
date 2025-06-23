@@ -1,481 +1,594 @@
-﻿// 
+// 
 // Copyright 2015 https://github.com/hope1026
 
 using System;
-using System.Globalization;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace SPlugin
 {
     internal class LogListWidget
     {
-        private readonly SGuiDragLine _iconDragLine = new SGuiDragLine();
-        private readonly SGuiDragLine _timeDragLine = new SGuiDragLine();
-        private readonly SGuiDragLine _frameCountDragLine = new SGuiDragLine();
-        private readonly SGuiDragLine _objectNameDragLine = new SGuiDragLine();
-        private readonly SGuiDragLine _stackTraceDragLine = new SGuiDragLine();
+        private ListView _logList;
+        private readonly List<LogItem> _displayedLogs = new List<LogItem>();
+        private LogItem _selectedLogItem;
+        private ConsoleViewAbstract _ownerLogView;
+        
+        // Column resizing
+        private Label _timeHeader;
+        private Label _frameHeader;
+        private Label _objectHeader;
+        private VisualElement _timeHeaderSeparator;
+        private VisualElement _frameHeaderSeparator;
+        private VisualElement _objectHeaderSeparator;
+        private ColumnResizeManipulator _timeHeaderResizer;
+        private ColumnResizeManipulator _frameHeaderResizer;
+        private ColumnResizeManipulator _objectHeaderResizer;
+        
+        public event Action<LogItem> OnLogItemSelected;
 
-        private LogView _ownerLogView = null;
-        private float _scrollValue = 0f;
-        private bool _isBottomFixedScrollBar = true;
-
-        private LogItem _selectedLogItem = null;
-        private bool _drawLogItemMenuPopup = false;
-        private int _drawableLogItemCount = 0;
-
-        private int _logItemStartIndex = 0;
-        private int _logItemLastIndex = 0;
-        private float _logItemDrawStartPosY = 0.0f;
-
-        private readonly LogStackWidget _logStackWidget = new LogStackWidget();
-
-        public void Initialize(LogView ownerLogView_)
+        public void Initialize(VisualElement rootElement_, ConsoleViewAbstract ownerLogView_)
         {
             _ownerLogView = ownerLogView_;
+            
+            // Get UI elements
+            _logList = rootElement_.Q<ListView>("log-list");
+            _timeHeader = rootElement_.Q<Label>("time-header");
+            _frameHeader = rootElement_.Q<Label>("frame-header");
+            _objectHeader = rootElement_.Q<Label>("object-header");
+            _timeHeaderSeparator = rootElement_.Q<VisualElement>("time-separator");
+            _frameHeaderSeparator = rootElement_.Q<VisualElement>("frame-separator");
+            _objectHeaderSeparator = rootElement_.Q<VisualElement>("object-separator");
+            
+            SetupLogList();
+            SetupHeaderColumnResizing();
         }
 
-        public void OnGuiCustom()
+        private void SetupLogList()
         {
-            if (_ownerLogView == null || _ownerLogView.CurrentAppRef == null)
+            if (_logList == null) 
+            {
+                Debug.LogError("LogList is null!");
                 return;
+            }
 
-            GUILayout.BeginArea(ConsoleViewLayoutDefines.LogListWidget.areaRect);
-            _logStackWidget.OnGuiCustom();
-            OnGuiVerticalDragLine();
-            OnGuiStackTraceLineBox();
-            OnGuiLogList();
-            OnGuiTitle();
-            GUILayout.EndArea();
+            // Configure ListView
+            _logList.makeItem = MakeLogItem;
+            _logList.bindItem = BindLogItem;
+            _logList.unbindItem = UnbindLogItem;
+            _logList.selectionChanged += OnLogSelectionChanged;
+            _logList.selectionType = UnityEngine.UIElements.SelectionType.Single;
+            _logList.showAlternatingRowBackgrounds = UnityEngine.UIElements.AlternatingRowBackground.ContentOnly;
+            
+            // Use DynamicHeight for text wrapping and variable height items
+            _logList.virtualizationMethod = CollectionVirtualizationMethod.DynamicHeight;
+            
+            // Ensure list is visible and properly sized
+            _logList.style.flexGrow = 1;
+            _logList.style.flexShrink = 1;
+            _logList.style.minHeight = 100;
+            
+            // Set initial data source
+            _logList.itemsSource = _displayedLogs;
         }
 
-        public void UpdateCustom()
+        private void SetupHeaderColumnResizing()
         {
-            if (_ownerLogView == null || _ownerLogView.CurrentAppRef == null)
-                return;
-
-            _drawableLogItemCount = Mathf.FloorToInt(ConsoleViewLayoutDefines.LogListWidget.Area.logListAreaRect.height / ConsoleViewLayoutDefines.LogListWidget.Area.AreaItemList.ITEM_HEIGHT);
-            if (true == _isBottomFixedScrollBar && true == CanShowVerticalScrollBarOfLogList())
+            // Setup resizing for Time column
+            if (_timeHeaderSeparator != null && _timeHeader != null && _frameHeader != null)
             {
-                _scrollValue = _ownerLogView.CurrentAppRef.logCollection.FilteredItemsCount() - _drawableLogItemCount;
+                _timeHeaderResizer = new ColumnResizeManipulator(_timeHeader, _frameHeader, "time", 40f);
+                _timeHeaderResizer.OnColumnResized += OnColumnResized;
+                _timeHeaderSeparator.AddManipulator(_timeHeaderResizer);
             }
-        }
-
-        private void OnGuiTitle()
-        {
-            GUI.Box(ConsoleViewLayoutDefines.LogListWidget.Area.areaTitleRect, "", SGuiStyle.BoxStyle);
-
-            Rect titleRect = new Rect(ConsoleViewLayoutDefines.LogListWidget.Area.areaTitleRect);
-            float drewWidth = titleRect.xMin;
-            string context = "FrameCount";
-            if (true == ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_TIME))
+            
+            // Setup resizing for Frame column
+            if (_frameHeaderSeparator != null && _frameHeader != null && _objectHeader != null)
             {
-                titleRect.xMin = drewWidth;
-                titleRect.width = ConsoleViewLayoutDefines.LogListWidget.Area.timeWidth;
-
-                context = "Time(S)";
-                context = SGuiUtility.ReplaceBoldString(context);
-                GUI.Label(titleRect, context, SGuiStyle.BoxStyle);
-                drewWidth += titleRect.width;
+                _frameHeaderResizer = new ColumnResizeManipulator(_frameHeader, _objectHeader, "frame", 40f);
+                _frameHeaderResizer.OnColumnResized += OnColumnResized;
+                _frameHeaderSeparator.AddManipulator(_frameHeaderResizer);
             }
-
-            if (true == ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_FRAME_COUNT))
+            
+            // Setup resizing for Object column
+            if (_objectHeaderSeparator != null && _objectHeader != null)
             {
-                titleRect.xMin = drewWidth;
-                titleRect.width = ConsoleViewLayoutDefines.LogListWidget.Area.frameCountWidth;
-
-                context = "FrameCount";
-                context = SGuiUtility.ReplaceBoldString(context);
-                GUI.Label(titleRect, context, SGuiStyle.BoxStyle);
-                drewWidth += titleRect.width;
-            }
-
-            if (true == ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_OBJECT_NAME))
-            {
-                titleRect.xMin = drewWidth;
-                titleRect.width = ConsoleViewLayoutDefines.LogListWidget.Area.objectNameWidth;
-
-                context = "ObjectName";
-                context = SGuiUtility.ReplaceBoldString(context);
-                GUI.Label(titleRect, context, SGuiStyle.BoxStyle);
-                drewWidth += titleRect.width;
-            }
-
-            titleRect.xMin = drewWidth;
-            titleRect.width = ConsoleViewLayoutDefines.LogListWidget.areaRect.width - drewWidth;
-
-            context = "SendLog";
-            context = SGuiUtility.ReplaceBoldString(context);
-            GUI.Label(titleRect, context, SGuiStyle.BoxStyle);
-        }
-
-        private void OnGuiVerticalDragLine()
-        {
-            SGuiStyle.BoxStyle.normal.background = EditorGUIUtility.whiteTexture;
-            Color lineColor = new Color(0.15f, 0.15f, 0.15f);
-
-            Rect titleRect = new Rect(ConsoleViewLayoutDefines.LogListWidget.Area.areaTitleRect);
-            Rect dragLineRect = new Rect(ConsoleViewLayoutDefines.LogListWidget.Area.areaTitleRect);
-            dragLineRect.width = 1f;
-            dragLineRect.height = ConsoleViewLayoutDefines.LogListWidget.areaRect.height - ConsoleViewLayoutDefines.LogListWidget.Area.areaStackTraceRect.height;
-
-            float drewWidth = titleRect.xMin;
-            Vector2 mousePosition = Vector2.zero;
-            Rect collisionOffset = new Rect(-5f, 0f, 10f, 0f);
-            _iconDragLine.OnGuiCustom(ref mousePosition, dragLineRect, collisionOffset, lineColor, SGuiStyle.BoxStyle, true);
-
-            if (true == ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_TIME))
-            {
-                titleRect.x = drewWidth;
-                titleRect.width = ConsoleViewLayoutDefines.LogListWidget.Area.timeWidth;
-                dragLineRect.x = titleRect.xMax;
-
-                if (true == _timeDragLine.OnGuiCustom(ref mousePosition, dragLineRect, collisionOffset, lineColor, SGuiStyle.BoxStyle, true))
-                {
-                    ConsoleViewLayoutDefines.LogListWidget.Area.timeWidth = Mathf.Max(40f, mousePosition.x - drewWidth);
-                }
-
-                drewWidth += titleRect.width;
-            }
-
-            if (true == ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_FRAME_COUNT))
-            {
-                titleRect.x = drewWidth;
-                titleRect.width = ConsoleViewLayoutDefines.LogListWidget.Area.frameCountWidth;
-                dragLineRect.x = titleRect.xMax;
-
-                if (true == _frameCountDragLine.OnGuiCustom(ref mousePosition, dragLineRect, collisionOffset, lineColor, SGuiStyle.BoxStyle, true))
-                {
-                    ConsoleViewLayoutDefines.LogListWidget.Area.frameCountWidth = Mathf.Max(40f, mousePosition.x - drewWidth);
-                }
-
-                drewWidth += titleRect.width;
-            }
-
-            if (true == ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_OBJECT_NAME))
-            {
-                titleRect.x = drewWidth;
-                titleRect.width = ConsoleViewLayoutDefines.LogListWidget.Area.objectNameWidth;
-                dragLineRect.x = titleRect.xMax;
-
-                if (true == _objectNameDragLine.OnGuiCustom(ref mousePosition, dragLineRect, collisionOffset, lineColor, SGuiStyle.BoxStyle, true))
-                {
-                    ConsoleViewLayoutDefines.LogListWidget.Area.objectNameWidth = Mathf.Max(40f, mousePosition.x - drewWidth);
-                }
-
-                drewWidth += titleRect.width;
-            }
-
-            SGuiStyle.BoxStyle.normal.background = GUI.skin.box.normal.background;
-        }
-
-        private void OnGuiStackTraceLineBox()
-        {
-            Rect lineRect = new Rect(ConsoleViewLayoutDefines.LogListWidget.Area.areaStackTraceRect);
-            lineRect.height = 1.0f;
-
-            if (null != _stackTraceDragLine)
-            {
-                Vector2 mousePosition = Vector2.zero;
-                Rect collisionOffset = new Rect(0f, -5f, -ConsoleViewLayoutDefines.VERTICAL_SCROLL_WIDTH, 10f);
-                if (true == _stackTraceDragLine.OnGuiCustom(ref mousePosition, lineRect, collisionOffset, Color.black, SGuiStyle.BoxStyle, false))
-                {
-                    ConsoleViewLayoutDefines.LogListWidget.Area.logListAreaRatio = mousePosition.y / (ConsoleViewLayoutDefines.LogListWidget.areaRect.height);
-                    ConsoleViewLayoutDefines.LogListWidget.OnChangeWindowSize();
-                }
+                _objectHeaderResizer = new ColumnResizeManipulator(_objectHeader, null, "object", 40f);
+                _objectHeaderResizer.OnColumnResized += OnColumnResized;
+                _objectHeaderSeparator.AddManipulator(_objectHeaderResizer);
             }
         }
 
-        private void OnGuiLogList()
+        private void OnColumnResized(string columnType_, float newWidth_)
         {
-            GUILayout.BeginArea(ConsoleViewLayoutDefines.LogListWidget.Area.logListAreaRect);
-
-            CheckScrollMouseWheel();
-            OnGuiLogListItems();
-            OnGuiLogListVerticalScroll();
-
-            GUILayout.EndArea();
-        }
-
-        private void OnGuiLogListItems()
-        {
-            int showAbleItemTotalCount = _ownerLogView.CurrentAppRef.logCollection.FilteredItemsCount();
-            if (true == CanShowVerticalScrollBarOfLogList())
+            // Update header column width to match
+            switch (columnType_)
             {
-                if (true == _isBottomFixedScrollBar)
-                {
-                    _logItemLastIndex = showAbleItemTotalCount - 1;
-                    _logItemStartIndex = Mathf.Max(0, _logItemLastIndex - _drawableLogItemCount);
-                    _logItemDrawStartPosY = -(_scrollValue - (float)_logItemStartIndex) * ConsoleViewLayoutDefines.LogListWidget.Area.AreaItemList.ITEM_HEIGHT;
-                }
-            }
-            else
-            {
-                _logItemStartIndex = 0;
-                _logItemLastIndex = showAbleItemTotalCount - 1;
-                _logItemDrawStartPosY = 0f;
-            }
-
-            float drawStartPosY = _logItemDrawStartPosY;
-
-            Rect drawRect = new Rect();
-            for (int index = _logItemStartIndex; index <= _logItemLastIndex; index++)
-            {
-                if (true == CanShowVerticalScrollBarOfLogList())
-                {
-                    drawRect.Set(0.0f, drawStartPosY, ConsoleViewLayoutDefines.LogListWidget.Area.logListAreaRect.width - ConsoleViewLayoutDefines.VERTICAL_SCROLL_WIDTH,
-                                 ConsoleViewLayoutDefines.LogListWidget.Area.AreaItemList.ITEM_HEIGHT);
-                }
-                else
-                {
-                    drawRect.Set(0.0f, drawStartPosY, ConsoleViewLayoutDefines.LogListWidget.Area.logListAreaRect.width,
-                                 ConsoleViewLayoutDefines.LogListWidget.Area.AreaItemList.ITEM_HEIGHT);
-                }
-
-                if (true == drawRect.Contains(Event.current.mousePosition))
-                {
-                    if (EventType.MouseDown == Event.current.type)
+                case "time":
+                    if (_timeHeader != null)
                     {
-                        _selectedLogItem = _ownerLogView.CurrentAppRef.logCollection.GetFilteredItem(index);
-                        _logStackWidget.ChangeSelectedLogItem(_selectedLogItem);
-                        ClickItem(_selectedLogItem);
-                        if (null != _selectedLogItem && 2 == Event.current.clickCount && Event.current.button == 0)
-                        {
-                            LogItem.OpenStackTraceFile(_selectedLogItem.FilePath, _selectedLogItem.LineNumber);
-                        }
+                        _timeHeader.style.width = newWidth_;
+                        _timeHeader.style.maxWidth = newWidth_;
+                        _timeHeader.style.minWidth = newWidth_;
                     }
-
-                    if (EventType.MouseUp == Event.current.type && Event.current.button == 1)
+                    break;
+                case "frame":
+                    if (_frameHeader != null)
                     {
-                        _drawLogItemMenuPopup = true;
+                        _frameHeader.style.width = newWidth_;
+                        _frameHeader.style.maxWidth = newWidth_;
+                        _frameHeader.style.minWidth = newWidth_;
+                    }
+                    break;
+                case "object":
+                    if (_objectHeader != null)
+                    {
+                        _objectHeader.style.width = newWidth_;
+                        _objectHeader.style.maxWidth = newWidth_;
+                        _objectHeader.style.minWidth = newWidth_;
+                    }
+                    break;
+            }
+            
+            // Refresh all log items to sync column widths
+            if (_logList != null)
+            {
+                _logList.RefreshItems();
+            }
+        }
+
+        public void RefreshLogList()
+        {
+            if (_logList == null) return;
+
+            // Store the current selection
+            var previousSelection = _selectedLogItem;
+            
+            _displayedLogs.Clear();
+
+            if (_ownerLogView.CurrentAppRef?.logCollection != null)
+            {
+                // Get filtered logs (matching IMGUI logic)
+                int filteredCount = _ownerLogView.CurrentAppRef.logCollection.FilteredItemsCount();
+                for (int i = 0; i < filteredCount; i++)
+                {
+                    var logItem = _ownerLogView.CurrentAppRef.logCollection.GetFilteredItem(i);
+                    if (logItem != null)
+                    {
+                        _displayedLogs.Add(logItem);
                     }
                 }
-
-                OnGuiLogItem(index, drawRect);
-                drawStartPosY += ConsoleViewLayoutDefines.LogListWidget.Area.AreaItemList.ITEM_HEIGHT;
             }
 
-            if (true == _drawLogItemMenuPopup)
-            {
-                if (null != _selectedLogItem)
+            // Update ListView data source safely
+            _logList.itemsSource = null; // Clear first to prevent pool issues
+            _logList.itemsSource = _displayedLogs;
+            
+            // Schedule refresh on next frame to avoid virtualization conflicts
+            _logList.schedule.Execute(() => {
+                if (_logList != null && _displayedLogs != null)
                 {
-                    GenericMenu logItemMenu = new GenericMenu();
-                    logItemMenu.AddItem(new GUIContent("Show Log"), false, OnLogItemMenuShowLogHandler);
-                    logItemMenu.AddItem(new GUIContent("Copy Log"), false, OnLogItemMenuCopyHandler);
-                    if (true == File.Exists(_selectedLogItem.FilePath))
+                    _logList.Rebuild();
+                    
+                    // Restore selection if possible
+                    if (previousSelection != null && _displayedLogs.Contains(previousSelection))
                     {
-                        logItemMenu.AddItem(new GUIContent("Open Source File"), false, OnLogItemMenuOpenSourceFileHandler);
+                        int index = _displayedLogs.IndexOf(previousSelection);
+                        _logList.SetSelection(index);
                     }
-
-                    logItemMenu.ShowAsContext();
                 }
+            }).StartingIn(1);
+        }
 
-                _drawLogItemMenuPopup = false;
+        private VisualElement MakeLogItem()
+        {
+            var logItemElement = new VisualElement();
+            logItemElement.AddToClassList("log-item");
+            // Most styling moved to CSS - only essential structure remains
+
+            // Time column - styling moved to CSS
+            var timeLabel = new Label();
+            timeLabel.name = "time-label";
+            logItemElement.Add(timeLabel);
+
+            // Time separator - styling moved to CSS
+            var timeSeparator = new VisualElement();
+            timeSeparator.name = "time-separator";
+            timeSeparator.AddToClassList("log-item-separator");
+            logItemElement.Add(timeSeparator);
+            
+            // Frame column - styling moved to CSS
+            var frameLabel = new Label();
+            frameLabel.name = "frame-label";
+            
+            // Add resize manipulator to time separator
+            var timeItemResizer = new ColumnResizeManipulator(timeLabel, frameLabel, "time", 40f);
+            timeItemResizer.OnColumnResized += OnColumnResized;
+            timeSeparator.AddManipulator(timeItemResizer);
+            logItemElement.Add(timeSeparator);
+            
+            logItemElement.Add(frameLabel);
+
+            // Frame separator - styling moved to CSS
+            var frameSeparator = new VisualElement();
+            frameSeparator.name = "frame-separator";
+            frameSeparator.AddToClassList("log-item-separator");
+            logItemElement.Add(frameSeparator);
+
+            // Object column - styling moved to CSS
+            var objectLabel = new Label();
+            objectLabel.name = "object-label";
+            
+            // Add resize manipulator to frame separator (now we have objectLabel reference)
+            var frameItemResizer = new ColumnResizeManipulator(frameLabel, objectLabel, "frame", 40f);
+            frameItemResizer.OnColumnResized += OnColumnResized;
+            frameSeparator.AddManipulator(frameItemResizer);
+            
+            logItemElement.Add(frameSeparator);
+            logItemElement.Add(objectLabel);
+
+            // Object separator - styling moved to CSS
+            var objectSeparator = new VisualElement();
+            objectSeparator.name = "object-separator";
+            objectSeparator.AddToClassList("log-item-separator");
+            
+            // Add resize manipulator to object separator
+            var objectItemResizer = new ColumnResizeManipulator(objectLabel, null, "object", 40f);
+            objectItemResizer.OnColumnResized += OnColumnResized;
+            objectSeparator.AddManipulator(objectItemResizer);
+            
+            logItemElement.Add(objectSeparator);
+
+            // Message column - styling moved to CSS
+            var messageLabel = new Label();
+            messageLabel.name = "message-label";
+            logItemElement.Add(messageLabel);
+
+            // Collapse count label - styling moved to CSS
+            var collapseLabel = new Label();
+            collapseLabel.name = "collapse-label";
+            logItemElement.Add(collapseLabel);
+
+            return logItemElement;
+        }
+
+        private void UnbindLogItem(VisualElement element_, int index_)
+        {
+            // Clean up any event handlers to prevent memory leaks
+            if (element_.userData != null)
+            {
+                element_.userData = null;
             }
         }
 
-        private void OnGuiLogItem(int itemIndex_, Rect drawRect_)
+        private void BindLogItem(VisualElement element_, int index_)
         {
-            LogItem tempLogItem = _ownerLogView.CurrentAppRef.logCollection.GetFilteredItem(itemIndex_);
-            if (null == tempLogItem)
-                return;
+            if (index_ < 0 || index_ >= _displayedLogs.Count) return;
 
-            if (tempLogItem != _selectedLogItem)
+            var logItem = _displayedLogs[index_];
+            if (logItem == null) return;
+            
+            var timeLabel = element_.Q<Label>("time-label");
+            var frameLabel = element_.Q<Label>("frame-label");
+            var objectLabel = element_.Q<Label>("object-label");
+            var messageLabel = element_.Q<Label>("message-label");
+            var collapseLabel = element_.Q<Label>("collapse-label");
+            
+            var timeSeparator = element_.Q<VisualElement>("time-separator");
+            var frameSeparator = element_.Q<VisualElement>("frame-separator");
+            var objectSeparator = element_.Q<VisualElement>("object-separator");
+
+            // Update visibility based on preferences
+            bool showTime = ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_TIME);
+            bool showFrame = ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_FRAME_COUNT);
+            bool showObject = ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_OBJECT_NAME);
+
+            timeLabel.style.display = showTime ? DisplayStyle.Flex : DisplayStyle.None;
+            frameLabel.style.display = showFrame ? DisplayStyle.Flex : DisplayStyle.None;
+            objectLabel.style.display = showObject ? DisplayStyle.Flex : DisplayStyle.None;
+            
+            timeSeparator.style.display = showTime ? DisplayStyle.Flex : DisplayStyle.None;
+            frameSeparator.style.display = showFrame ? DisplayStyle.Flex : DisplayStyle.None;
+            objectSeparator.style.display = showObject ? DisplayStyle.Flex : DisplayStyle.None;
+            
+            // Sync column widths with headers
+            SyncColumnWidths(timeLabel, frameLabel, objectLabel);
+
+            // Set content
+            if (showTime) timeLabel.text = logItem.TimeSeconds.ToString("F2");
+            if (showFrame) frameLabel.text = logItem.FrameCount.ToString();
+            if (showObject) objectLabel.text = logItem.ObjectName ?? "";
+
+            // Process message
+            string message = logItem.LogData ?? "";
+            if (message.Length > 1000)
             {
-                SGuiUtility.BeginBackgroundColor((itemIndex_ % 2 == 0 ? ConsoleEditorPrefs.LogViewBackground1Color : ConsoleEditorPrefs.LogViewBackground2Color));
+                message = message.Substring(0, 1000);
             }
-            else
+
+            // Highlight search strings
+            if (logItem.ContainSearchStringList != null)
             {
-                SGuiUtility.BeginBackgroundColor(ConsoleEditorPrefs.LogViewSelectedBackgroundColor);
-                SGuiStyle.BoxStyle.normal.background = EditorGUIUtility.whiteTexture;
+                foreach (string searchString in logItem.ContainSearchStringList)
+                {
+                    if (!string.IsNullOrEmpty(searchString))
+                    {
+                        message = message.Replace(searchString, $"<b><size=15>{searchString}</size></b>");
+                    }
+                }
             }
 
-            GUI.Box(drawRect_, "", SGuiStyle.BoxStyle);
-            SGuiStyle.BoxStyle.normal.background = GUI.skin.box.normal.background;
-            SGuiUtility.EndBackgroundColor();
+            messageLabel.text = message;
 
-            string tempString = tempLogItem.LogData;
-            if (1000 < tempString.Length)
-            {
-                tempString = tempString.Remove(1000);
-            }
-
-            foreach (string searchString in tempLogItem.ContainSearchStringList)
-            {
-                tempString = tempString.Replace(searchString, $"<size=15><b>{searchString}</b></size>");
-            }
-
-            switch (tempLogItem.LogType)
+            // Apply color based on log type
+            Color textColor = Color.white;
+            switch (logItem.LogType)
             {
                 case LogType.Log:
-                {
-                    tempString = SGuiUtility.ReplaceColorString(tempString, ConsoleEditorPrefs.LogTextColor);
+                    textColor = ConsoleEditorPrefs.TextColor;
                     break;
-                }
                 case LogType.Warning:
-                {
-                    tempString = SGuiUtility.ReplaceColorString(tempString, ConsoleEditorPrefs.WarningTextColor);
+                    textColor = ConsoleEditorPrefs.WarningTextColor;
                     break;
-                }
                 case LogType.Error:
+                case LogType.Exception:
+                    textColor = ConsoleEditorPrefs.ErrorTextColor;
+                    break;
+            }
+            messageLabel.style.color = new StyleColor(textColor);
+
+            // Handle collapse count
+            if (logItem.CollapseCount > 0)
+            {
+                collapseLabel.text = logItem.CollapseCount.ToString();
+                collapseLabel.style.display = DisplayStyle.Flex;
+            }
+            else
+            {
+                collapseLabel.style.display = DisplayStyle.None;
+            }
+
+            // Set background color based on selection and alternating rows
+            if (logItem == _selectedLogItem)
+            {
+                element_.style.backgroundColor = new StyleColor(ConsoleEditorPrefs.LogViewSelectedBackgroundColor);
+            }
+            else
+            {
+                Color bgColor = (index_ % 2 == 0) ? 
+                    ConsoleEditorPrefs.LogViewBackground1Color : 
+                    ConsoleEditorPrefs.LogViewBackground2Color;
+                element_.style.backgroundColor = new StyleColor(bgColor);
+            }
+            
+            // Add context menu functionality
+            SetupLogItemContextMenu(element_, logItem);
+        }
+
+        private void SyncColumnWidths(Label timeLabel_, Label frameLabel_, Label objectLabel_)
+        {
+            // Sync column widths with header widths
+            if (_timeHeader != null && timeLabel_ != null)
+            {
+                float headerWidth = _timeHeader.resolvedStyle.width;
+                if (headerWidth > 0)
                 {
-                    tempString = SGuiUtility.ReplaceColorString(tempString, ConsoleEditorPrefs.ErrorTextColor);
+                    timeLabel_.style.width = headerWidth;
+                    timeLabel_.style.maxWidth = headerWidth;
+                    timeLabel_.style.minWidth = headerWidth;
+                }
+            }
+            
+            if (_frameHeader != null && frameLabel_ != null)
+            {
+                float headerWidth = _frameHeader.resolvedStyle.width;
+                if (headerWidth > 0)
+                {
+                    frameLabel_.style.width = headerWidth;
+                    frameLabel_.style.maxWidth = headerWidth;
+                    frameLabel_.style.minWidth = headerWidth;
+                }
+            }
+            
+            if (_objectHeader != null && objectLabel_ != null)
+            {
+                float headerWidth = _objectHeader.resolvedStyle.width;
+                if (headerWidth > 0)
+                {
+                    objectLabel_.style.width = headerWidth;
+                    objectLabel_.style.maxWidth = headerWidth;
+                    objectLabel_.style.minWidth = headerWidth;
+                }
+            }
+        }
+
+        private void OnLogSelectionChanged(IEnumerable<object> selectedItems_)
+        {
+            foreach (var item in selectedItems_)
+            {
+                // Handle both LogItem objects and indices
+                LogItem logItem = null;
+                if (item is LogItem directLogItem)
+                {
+                    logItem = directLogItem;
+                }
+                else if (item is int index && index >= 0 && index < _displayedLogs.Count)
+                {
+                    logItem = _displayedLogs[index];
+                }
+                
+                if (logItem != null)
+                {
+                    _selectedLogItem = logItem;
+                    
+                    // Notify parent about selection
+                    OnLogItemSelected?.Invoke(logItem);
+                    
+                    // Ping object in hierarchy
+                    if (logItem.ObjectInstanceID != 0)
+                    {
+                        UnityEditor.EditorGUIUtility.PingObject(logItem.ObjectInstanceID);
+                    }
+                    
+                    // Refresh list to update selection highlighting
+                    _logList?.RefreshItems();
                     break;
                 }
             }
-
-            Rect tempRect = new Rect(drawRect_);
-            float drewWidth = tempRect.xMin;
-
-            if (true == ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_TIME))
-            {
-                SGuiStyle.LabelStyle.alignment = TextAnchor.MiddleCenter;
-                tempRect.x = drewWidth;
-                tempRect.width = ConsoleViewLayoutDefines.LogListWidget.Area.timeWidth;
-                EditorGUI.LabelField(tempRect, tempLogItem.TimeSeconds.ToString(CultureInfo.InvariantCulture), SGuiStyle.LabelStyle);
-                drewWidth += tempRect.width;
-            }
-
-            if (true == ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_FRAME_COUNT))
-            {
-                SGuiStyle.LabelStyle.alignment = TextAnchor.MiddleCenter;
-                tempRect.x = drewWidth;
-                tempRect.width = ConsoleViewLayoutDefines.LogListWidget.Area.frameCountWidth;
-                EditorGUI.LabelField(tempRect, tempLogItem.FrameCount.ToString(), SGuiStyle.LabelStyle);
-                drewWidth += tempRect.width;
-            }
-
-            if (true == ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_OBJECT_NAME))
-            {
-                SGuiStyle.LabelStyle.alignment = TextAnchor.MiddleCenter;
-                tempRect.x = drewWidth;
-                tempRect.width = ConsoleViewLayoutDefines.LogListWidget.Area.objectNameWidth;
-                EditorGUI.LabelField(tempRect, tempLogItem.ObjectName, SGuiStyle.LabelStyle);
-                drewWidth += tempRect.width;
-            }
-
-            SGuiStyle.LabelStyle.alignment = TextAnchor.UpperLeft;
-            SGuiStyle.LabelStyle.wordWrap = true;
-            tempRect.xMin = drewWidth;
-            tempRect.width = drawRect_.width - drewWidth;
-
-            EditorGUI.LabelField(tempRect, tempString, SGuiStyle.LabelStyle);
-            drewWidth += tempRect.width;
-
-            if (tempLogItem.CollapseCount > 0)
-            {
-                SGuiStyle.HorizontalScrollbarThumbStyle.alignment = TextAnchor.MiddleCenter;
-                tempRect.x = drewWidth - ConsoleViewLayoutDefines.LogListWidget.Area.ICON_WIDTH - 10f;
-                tempRect.width = ConsoleViewLayoutDefines.LogListWidget.Area.ICON_WIDTH + 10f;
-                string context = tempLogItem.CollapseCount.ToString();
-                EditorGUI.LabelField(tempRect, context, SGuiStyle.HorizontalScrollbarThumbStyle);
-            }
         }
 
-        private void OnLogItemMenuShowLogHandler()
+        public void UpdateHeaderVisibility()
         {
-            ExtendLogEditorWindow window = EditorWindow.GetWindow<ExtendLogEditorWindow>();
-            window.ShowUtility();
-            window.position.Set(ConsoleViewLayoutDefines.LogViewToolbarWidget.areaRect.center.x, ConsoleViewLayoutDefines.LogViewToolbarWidget.areaRect.yMax, window.position.width, window.position.height);
-            window.SetLogItem(_selectedLogItem);
-        }
-
-        private void OnLogItemMenuCopyHandler()
-        {
-            if (null != _selectedLogItem)
+            bool showTime = ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_TIME);
+            bool showFrame = ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_FRAME_COUNT);
+            bool showObject = ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_OBJECT_NAME);
+            
+            // Update header visibility using CSS classes
+            if (_timeHeader != null)
             {
-                EditorGUIUtility.systemCopyBuffer = _selectedLogItem.LogData;
-            }
-        }
-
-        private void OnLogItemMenuOpenSourceFileHandler()
-        {
-            if (null != _selectedLogItem)
-            {
-                LogItem.OpenStackTraceFile(_selectedLogItem.FilePath, _selectedLogItem.LineNumber);
-            }
-        }
-
-        private void ClickItem(LogItem logItem_)
-        {
-            if (null == logItem_)
-                return;
-
-            EditorGUIUtility.PingObject(logItem_.ObjectInstanceID);
-        }
-
-        private void OnGuiLogListVerticalScroll()
-        {
-            if (true == CanShowVerticalScrollBarOfLogList())
-            {
-                float oldValue = _scrollValue;
-                _scrollValue = GUI.VerticalScrollbar(ConsoleViewLayoutDefines.LogListWidget.Area.AreaItemList.scrollVerticalRect,
-                                                     _scrollValue, _drawableLogItemCount, 0, _ownerLogView.CurrentAppRef.logCollection.FilteredItemsCount());
-
-                if (float.Epsilon < Math.Abs(oldValue - _scrollValue))
-                {
-                    if (_scrollValue >= _ownerLogView.CurrentAppRef.logCollection.FilteredItemsCount() - _drawableLogItemCount)
-                    {
-                        SetBottomFixedScrollBar(true);
-                    }
-                    else
-                    {
-                        SetBottomFixedScrollBar(false);
-                    }
-                }
-            }
-            else
-            {
-                SetBottomFixedScrollBar(true);
-            }
-        }
-
-        private void CheckScrollMouseWheel()
-        {
-            if (true == CanShowVerticalScrollBarOfLogList() &&
-                EventType.ScrollWheel == Event.current.type &&
-                true == ConsoleViewLayoutDefines.LogListWidget.Area.logListAreaRect.Contains(Event.current.mousePosition))
-            {
-                _scrollValue += Event.current.delta.y;
-                _scrollValue = Mathf.Max(_scrollValue, 0f);
-                _scrollValue = Mathf.Min(_scrollValue, _ownerLogView.CurrentAppRef.logCollection.FilteredItemsCount() - _drawableLogItemCount);
-                if (_scrollValue >= _ownerLogView.CurrentAppRef.logCollection.FilteredItemsCount() - _drawableLogItemCount)
-                {
-                    SetBottomFixedScrollBar(true);
-                }
+                if (showTime)
+                    _timeHeader.RemoveFromClassList("hidden");
                 else
+                    _timeHeader.AddToClassList("hidden");
+            }
+            
+            if (_frameHeader != null)
+            {
+                if (showFrame)
+                    _frameHeader.RemoveFromClassList("hidden");
+                else
+                    _frameHeader.AddToClassList("hidden");
+            }
+            
+            if (_objectHeader != null)
+            {
+                if (showObject)
+                    _objectHeader.RemoveFromClassList("hidden");
+                else
+                    _objectHeader.AddToClassList("hidden");
+            }
+                
+            // Update separator visibility using CSS classes
+            if (_timeHeaderSeparator != null)
+            {
+                if (showTime)
+                    _timeHeaderSeparator.RemoveFromClassList("hidden");
+                else
+                    _timeHeaderSeparator.AddToClassList("hidden");
+            }
+                
+            if (_frameHeaderSeparator != null)
+            {
+                if (showFrame)
+                    _frameHeaderSeparator.RemoveFromClassList("hidden");
+                else
+                    _frameHeaderSeparator.AddToClassList("hidden");
+            }
+                
+            if (_objectHeaderSeparator != null)
+            {
+                if (showObject)
+                    _objectHeaderSeparator.RemoveFromClassList("hidden");
+                else
+                    _objectHeaderSeparator.AddToClassList("hidden");
+            }
+        }
+
+        public void ScrollToBottom()
+        {
+            if (_logList != null && _displayedLogs.Count > 0)
+            {
+                _logList.ScrollToItem(_displayedLogs.Count - 1);
+            }
+        }
+
+        private void SetupLogItemContextMenu(VisualElement element_, LogItem logItem_)
+        {
+            // Store the log item reference for context menu
+            element_.userData = logItem_;
+            
+            element_.RegisterCallback<MouseDownEvent>(OnLogItemMouseDown);
+            element_.AddManipulator(
+                new ContextualMenuManipulator(BuildLogItemMenu)
+            );
+            return;
+
+            void OnLogItemMouseDown(MouseDownEvent evt_)
+            {
+                if (evt_.clickCount == 2 && evt_.button == 0)
                 {
-                    SetBottomFixedScrollBar(false);
+                    if ((evt_.target as VisualElement)?.userData is LogItem logItem)
+                        OnLogItemMenuOpenSourceFile(logItem);
                 }
             }
-        }
 
-        public void SetBottomFixedScrollBar(bool fix_)
-        {
-            _isBottomFixedScrollBar = fix_;
-            if (false == _isBottomFixedScrollBar)
+            void BuildLogItemMenu(ContextualMenuPopulateEvent evt_)
             {
-                _logItemStartIndex = (int)_scrollValue;
-                _logItemLastIndex = _logItemStartIndex + _drawableLogItemCount;
-                _logItemDrawStartPosY = -(_scrollValue - (float)_logItemStartIndex) * ConsoleViewLayoutDefines.LogListWidget.Area.AreaItemList.ITEM_HEIGHT;
-            }
-            else
-            {
-                _scrollValue = (int)_ownerLogView.CurrentAppRef.logCollection.FilteredItemsCount() - _drawableLogItemCount;
-                _scrollValue = Mathf.Max(_scrollValue, 0f);
-                _logItemLastIndex = _ownerLogView.CurrentAppRef.logCollection.FilteredItemsCount() - 1;
-                _logItemStartIndex = Mathf.Max(0, _logItemLastIndex - _drawableLogItemCount);
-                _logItemDrawStartPosY = -(_scrollValue - (float)_logItemStartIndex) * ConsoleViewLayoutDefines.LogListWidget.Area.AreaItemList.ITEM_HEIGHT;
+                if ((evt_.target as VisualElement)?.userData is not LogItem logItem) return;
+
+                evt_.menu.MenuItems().Clear();
+                evt_.menu.AppendAction("Show Log", _ => OnLogItemMenuShowLog(logItem), DropdownMenuAction.AlwaysEnabled);
+                evt_.menu.AppendAction("Copy Log", _ => OnLogItemMenuCopyLog(logItem), DropdownMenuAction.AlwaysEnabled);
+
+                if (!string.IsNullOrEmpty(logItem.FilePath) && File.Exists(logItem.FilePath))
+                    evt_.menu.AppendAction("Open Source File", _ => OnLogItemMenuOpenSourceFile(logItem), DropdownMenuAction.AlwaysEnabled);
             }
         }
 
-        private bool CanShowVerticalScrollBarOfLogList()
+        private void OnLogItemMenuShowLog(LogItem logItem_)
         {
-            if (_ownerLogView.CurrentAppRef.logCollection.FilteredItemsCount() > _drawableLogItemCount)
-                return true;
+            if (logItem_ == null) return;
+            
+            // Open ExtendLogEditorWindow - same as IMGUI version
+            var window = EditorWindow.GetWindow<ExtendLogEditorWindow>();
+            window.ShowUtility();
+            
+            // Position the window relative to the console window (approximate position)
+            var consoleWindow = EditorWindow.focusedWindow;
+            if (consoleWindow != null)
+            {
+                var consolePos = consoleWindow.position;
+                var newPos = new Rect(
+                    consolePos.center.x - 200, // Center horizontally relative to console
+                    consolePos.y + 100,        // Offset from top
+                    window.position.width,
+                    window.position.height
+                );
+                window.position = newPos;
+            }
+            
+            window.SetLogItem(logItem_);
+        }
 
-            return false;
+        private void OnLogItemMenuCopyLog(LogItem logItem_)
+        {
+            if (logItem_ == null) return;
+            
+            // Copy log data to system clipboard - same as IMGUI version
+            EditorGUIUtility.systemCopyBuffer = logItem_.LogData;
+        }
+
+        private void OnLogItemMenuOpenSourceFile(LogItem logItem_)
+        {
+            if (logItem_ == null) return;
+            
+            // Open source file at specific line - same as IMGUI version
+            LogItem.OpenStackTraceFile(logItem_.FilePath, logItem_.LineNumber);
+        }
+
+        public void Cleanup()
+        {
+            // Unsubscribe from events
+            if (_timeHeaderResizer != null)
+                _timeHeaderResizer.OnColumnResized -= OnColumnResized;
+            if (_frameHeaderResizer != null)
+                _frameHeaderResizer.OnColumnResized -= OnColumnResized;
+            if (_objectHeaderResizer != null)
+                _objectHeaderResizer.OnColumnResized -= OnColumnResized;
         }
     }
 }

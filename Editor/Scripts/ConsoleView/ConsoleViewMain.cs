@@ -4,21 +4,25 @@
 using System;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace SPlugin
 {
     internal class ConsoleViewMain
     {
         private SConsoleEditorWindow _consoleEditorWindow = null;
-
+        
         private ConsoleViewSelectMenu _consoleViewSelectMenu = null;
-        private SystemMessageView _systemLogView = null;
+        private SystemMessageView _systemMessageView = null;
 
         private string _notifyMessage = string.Empty;
         private bool _forceChangeWindow = false;
         private readonly ConsoleViewAbstract[] _consoleViews = new ConsoleViewAbstract[ConsoleViewTypeUtil.COUNT];
         private ConsoleViewType _currentConsoleViewType = ConsoleViewType.LOG;
         public ConsoleViewType CurrentConsoleViewType => _currentConsoleViewType;
+
+        private VisualElement _uiToolkitContainer;
+        private VisualElement _currentUIToolkitView;
 
         #region SINGLETON
 
@@ -52,15 +56,13 @@ namespace SPlugin
             _consoleEditorWindow = editorWindow_;
             _consoleEditorWindow.position.Set(_consoleEditorWindow.position.x, _consoleEditorWindow.position.y, ConsoleViewLayoutDefines.windowSize.x, ConsoleViewLayoutDefines.windowSize.y);
             _consoleEditorWindow.wantsMouseMove = true;
-            _consoleEditorWindow.titleContent = new GUIContent(ConsoleViewNameDefines.Window.TITLE);
+            _consoleEditorWindow.titleContent = new GUIContent("SConsole");
 
             ConsoleEditorPrefs.ReadPrefs();
 
             AppManager.Instance.Initialize();
 
-            _consoleViewSelectMenu = new ConsoleViewSelectMenu();
-            _consoleViewSelectMenu.Initialize(this, AppManager.Instance.GetActivatedApp());
-
+            // Initialize all views
             _consoleViews[(int)ConsoleViewType.LOG] = new LogView();
             _consoleViews[(int)ConsoleViewType.COMMAND] = new CommandView();
             _consoleViews[(int)ConsoleViewType.PREFERENCES] = new PreferencesView();
@@ -73,9 +75,29 @@ namespace SPlugin
 
             ShowView(_currentConsoleViewType);
 
-            _systemLogView = new SystemMessageView();
-
             RemoteConsoleLocalEditorBridge.Instance.RegisterUpdateInEditorDelegate();
+        }
+
+        public void InitializeUI(VisualElement container_)
+        {
+            _uiToolkitContainer = container_;
+            
+            // Create menu and system view
+            _consoleViewSelectMenu = new ConsoleViewSelectMenu();
+            _consoleViewSelectMenu.Initialize(this, AppManager.Instance.GetActivatedApp());
+            
+            _systemMessageView = new SystemMessageView();
+            _systemMessageView.Initialize(container_);
+            
+            // Add menu to top of container
+            var menuElement = _consoleViewSelectMenu.GetRootElement();
+            if (menuElement != null)
+            {
+                container_.Insert(0, menuElement);
+            }
+            
+            // Update UI view based on current view type
+            UpdateUIView();
         }
 
         public void Terminate()
@@ -86,6 +108,7 @@ namespace SPlugin
             }
 
             _consoleViewSelectMenu?.Terminate();
+            _systemMessageView?.Terminate();
         }
 
         public void ShowView(ConsoleViewType showingConsoleViewType_)
@@ -109,33 +132,46 @@ namespace SPlugin
             }
 
             _currentConsoleViewType = showingConsoleViewType_;
+            
+            // Update UI view if container is available
+            UpdateUIView();
         }
 
-        public void OnGUICustom()
+        private void UpdateUIView()
         {
-            if (null == _consoleEditorWindow) return;
+            if (_uiToolkitContainer == null) return;
 
-            ChangeWindowSizeIfChangedWindowEditor();
-            _consoleEditorWindow.BeginWindows();
-
-            GUILayout.BeginArea(ConsoleViewLayoutDefines.ViewSelectMenu.areaRect);
-            _consoleViewSelectMenu?.OnGuiCustom();
-            GUILayout.EndArea();
-
-            GUILayout.BeginArea(ConsoleViewLayoutDefines.View.areaRect);
-            _consoleViews[(int)_currentConsoleViewType]?.OnGuiCustom();
-            GUILayout.EndArea();
-
-            _systemLogView?.OnGuiCustom();
-
-            _consoleEditorWindow.EndWindows();
-
-            _consoleEditorWindow.Repaint();
-
-            if (true == SGuiStyle.RequestUpdateColors)
+            // Clear current UI view
+            if (_currentUIToolkitView != null)
             {
-                SGuiStyle.UpdateColor();
-                SGuiStyle.RequestUpdateColors = false;
+                _uiToolkitContainer.Remove(_currentUIToolkitView);
+                _currentUIToolkitView = null;
+            }
+
+            // Add new UI view
+            var currentView = _consoleViews[(int)_currentConsoleViewType];
+            VisualElement viewElement = null;
+
+            switch (currentView)
+            {
+                case PreferencesView preferencesView:
+                    viewElement = preferencesView.GetRootElement();
+                    break;
+                case ApplicationsView applicationsView:
+                    viewElement = applicationsView.GetRootElement();
+                    break;
+                case CommandView commandView:
+                    viewElement = commandView.GetRootElement();
+                    break;
+                case LogView logView:
+                    viewElement = logView.GetRootElement();
+                    break;
+            }
+
+            if (viewElement != null)
+            {
+                _currentUIToolkitView = viewElement;
+                _uiToolkitContainer.Add(_currentUIToolkitView);
             }
         }
 
@@ -144,7 +180,15 @@ namespace SPlugin
             RemoteConsoleLocalEditorBridge.Instance.UpdateInEditor();
             AppManager.Instance.UpdateCustom();
             _consoleViews[(int)_currentConsoleViewType]?.UpdateCustom();
-            _systemLogView?.UpdateCustom();
+            
+            // Update system message view
+            if (_systemMessageView != null)
+            {
+                _systemMessageView.UpdateCustom();
+            }
+            
+            // Update menu
+            _consoleViewSelectMenu?.UpdateCustom();
 
             ShowNotifyDialogIfExistMessage();
         }
@@ -175,6 +219,7 @@ namespace SPlugin
         public void OnChangedCurrentApp(AppAbstract currentApp_)
         {
             _consoleViewSelectMenu?.OnChangedCurrentApp(currentApp_);
+            
             foreach (ConsoleViewAbstract consoleView in _consoleViews)
             {
                 consoleView?.OnChangeCurrentApp(currentApp_);
@@ -206,6 +251,23 @@ namespace SPlugin
             }
 
             return string.Empty;
+        }
+
+        public void AddSystemLogData(LogItem logData_)
+        {
+            if (_systemMessageView != null)
+            {
+                _systemMessageView.AddSystemLogData(logData_);
+            }
+        }
+
+        public void RequestLogViewRefresh()
+        {
+            // Request refresh on LogView to update background colors
+            if (_consoleViews[(int)ConsoleViewType.LOG] is LogView logView)
+            {
+                logView.RequestRefresh();
+            }
         }
     }
 }

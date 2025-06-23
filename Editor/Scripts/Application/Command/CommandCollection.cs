@@ -20,7 +20,7 @@ namespace SPlugin
                 commandsByCategory.Add(commandItem_.Category, commandList);
             }
 
-            int foundIndex = commandList.FindIndex((item_) => item_.Name.Equals(commandItem_.Name));
+            int foundIndex = commandList.FindIndex((item_) => item_.CommandName.Equals(commandItem_.CommandName));
             if (0 <= foundIndex && foundIndex < commandList.Count)
             {
                 commandList[foundIndex] = commandItem_;

@@ -23,7 +23,7 @@ namespace SPlugin
             public string FilePath { get; set; } = string.Empty;
             public int LineNumber { get; set; } = 0;
             public string DisplayStackString { get; set; } = string.Empty;
-            public string originalStackString { get; set; } = string.Empty;
+            public string OriginalStackString { get; set; } = string.Empty;
             public bool IsAbsolutePath { get; set; } = false;
         }
 
@@ -58,12 +58,12 @@ namespace SPlugin
                     continue;
 
                 LogItem.StackContext stackContext = new LogItem.StackContext();
-                stackContext.originalStackString = stackString;
+                stackContext.OriginalStackString = stackString;
                 stringBuilder.AppendLine(stackString);
 
                 if (true == stackString.Contains(STACK_PATH_START_STRING) && true == stackString.Contains(":"))
                 {
-                    stackContext.IsAbsolutePath = !stackContext.originalStackString.Contains(DATA_DIRECTORY_NAME);
+                    stackContext.IsAbsolutePath = !stackContext.OriginalStackString.Contains(DATA_DIRECTORY_NAME);
 
                     string pathString = stackString.Substring(stackString.IndexOf(STACK_PATH_START_STRING, StringComparison.Ordinal) + STACK_PATH_START_STRING.Length);
                     pathString = pathString.Remove(pathString.LastIndexOf(":", StringComparison.Ordinal));
@@ -98,7 +98,7 @@ namespace SPlugin
                     {
                         string oldString = $"{pathString}:{lineNumberString}";
                         string hyperLinkString = $"<a {HYPER_LINK_KEY_FILE_PATH}=\"{stackContext.FilePath}\" {HYPER_LINK_KEY_LINE_NUMBER}=\"{stackContext.LineNumber}\">{pathString}:{lineNumberString}</a>";
-                        stackContext.DisplayStackString = stackContext.originalStackString.Replace(oldString, hyperLinkString);
+                        stackContext.DisplayStackString = stackContext.OriginalStackString.Replace(oldString, hyperLinkString);
                     }
                 }
 

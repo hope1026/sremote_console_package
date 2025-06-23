@@ -20,6 +20,7 @@ namespace SPlugin
 
         public void Terminate()
         {
+            OnTerminate();
             _consoleViewMainRef = null;
         }
 
@@ -45,5 +46,6 @@ namespace SPlugin
         protected virtual void OnInitialize() { }
         protected virtual void OnShow() { }
         protected virtual void OnHide() { }
+        protected virtual void OnTerminate() { }
     }
 }

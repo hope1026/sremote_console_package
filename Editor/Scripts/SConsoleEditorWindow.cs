@@ -6,10 +6,12 @@ using System.Reflection;
 using SPlugin;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class SConsoleEditorWindow : EditorWindow
 {
     private static SConsoleEditorWindow _consoleEditorWindow = null;
+    private VisualElement _uiToolkitContainer;
 
     [MenuItem("Window/SPlugin/SConsole")]
     static void InstanceConsoleEditor()
@@ -17,11 +19,17 @@ public class SConsoleEditorWindow : EditorWindow
         _consoleEditorWindow = GetWindow<SConsoleEditorWindow>();
     }
 
-    void OnGUI()
+    void CreateGUI()
     {
         try
         {
-            ConsoleViewMain.Instance.OnGUICustom();
+            // Create UI container
+            _uiToolkitContainer = new VisualElement();
+            _uiToolkitContainer.style.flexGrow = 1;
+            rootVisualElement.Add(_uiToolkitContainer);
+            
+            // Initialize UI views in ConsoleViewMain
+            ConsoleViewMain.Instance.InitializeUI(_uiToolkitContainer);
         }
         catch (Exception exception)
         {
@@ -79,18 +87,6 @@ public class SConsoleEditorWindow : EditorWindow
         catch (Exception exception)
         {
             Debug.LogException(exception);
-        }
-    }
-
-    public static void ResetTitleIcon(Texture titleIconTexture_)
-    {
-        if (null != _consoleEditorWindow)
-        {
-            GUIContent content = SGuiUtility.GetWinTitleContent(_consoleEditorWindow);
-            if (null != content)
-            {
-                content.image = titleIconTexture_;
-            }
         }
     }
 

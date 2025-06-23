@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement class="extend-log-window-root">
+        <ui:VisualElement name="search-section" class="search-section">
+            <ui:Label text="Search" class="search-label" />
+            <ui:TextField name="search-field" placeholder-text="All" class="search-field" />
+        </ui:VisualElement>
+        <ui:ScrollView name="log-scroll" class="log-scroll">
+            <ui:TextField name="log-content" multiline="true" readonly="true" class="log-content" />
+        </ui:ScrollView>
+    </ui:VisualElement>
+</ui:UXML>

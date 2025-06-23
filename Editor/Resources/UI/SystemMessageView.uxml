@@ -1,0 +1,26 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <!-- System Message Popup Window -->
+    <ui:VisualElement name="system-message-overlay" class="system-message-overlay hidden">
+        <ui:VisualElement name="system-message-window" class="system-message-window">
+            
+            <!-- Header -->
+            <ui:VisualElement class="system-message-header">
+                <ui:Label text="System Message" class="system-message-title" />
+                <ui:Button name="close-button" text="×" class="system-message-close-btn" />
+            </ui:VisualElement>
+            
+            <!-- Content Area -->
+            <ui:ScrollView name="message-scroll-view" class="system-message-content">
+                <ui:VisualElement name="message-container" class="system-message-list">
+                    <!-- Messages will be added dynamically here -->
+                </ui:VisualElement>
+            </ui:ScrollView>
+            
+            <!-- Footer -->
+            <ui:VisualElement class="system-message-footer">
+                <ui:Label text="Click anywhere to close" class="system-message-hint" />
+            </ui:VisualElement>
+            
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

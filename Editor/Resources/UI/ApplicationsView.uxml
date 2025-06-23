@@ -1,0 +1,75 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <ui:VisualElement class="applications-main-container">
+        
+        <!-- Left Panel - Applications List -->
+        <ui:VisualElement name="applications-list-panel" class="applications-list-panel">
+            <ui:ScrollView class="applications-container">
+                
+                <!-- Table Header -->
+                <ui:VisualElement name="table-header" class="table-header">
+                    <ui:Label text="DeviceName" name="device-name-header" class="table-header-cell device-name-header" />
+                    <ui:VisualElement name="device-name-separator" class="table-header-separator" />
+                    <ui:Label text="ProductName" name="product-name-header" class="table-header-cell product-name-header" />
+                    <ui:VisualElement name="product-name-separator" class="table-header-separator" />
+                    <ui:Label text="IpAddress" name="ip-address-header" class="table-header-cell ip-address-header" />
+                    <ui:VisualElement name="ip-address-separator" class="table-header-separator" />
+                    <ui:Label text="State" name="state-header" class="table-header-cell state-header" />
+                </ui:VisualElement>
+                
+                <!-- Current App Section -->
+                <ui:VisualElement class="app-section">
+                    <ui:Label text="Current App" class="section-title" />
+                    <ui:VisualElement name="current-app-row" class="app-row current-app">
+                        <!-- Will be populated dynamically -->
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                
+                <!-- Local Apps Section -->
+                <ui:VisualElement class="app-section">
+                    <ui:Label text="Local Apps" class="section-title" />
+                    <ui:VisualElement name="local-apps-container" class="apps-container">
+                        <!-- Will be populated dynamically -->
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                
+                <!-- Remote Apps Section -->
+                <ui:VisualElement class="app-section">
+                    <ui:VisualElement class="remote-app-section-header">
+                        <ui:Label text="Remote Apps" class="section-title" />
+                        <ui:VisualElement name="scanning-controls" class="scanning-controls">
+                            <ui:Button name="scan-network-button" text="Scan Local Network" class="console-button scan-network-button" />
+                            <ui:VisualElement name="direct-connection" class="direct-connection">
+                                <ui:Label name="direct-connection-label" text="Direct Connection" />
+                                <ui:TextField name="direct-ip-field" placeholder-text="IP Address" class="direct-connection-text-field" />
+                                <ui:Button name="connect-direct-button" text="Connect" class="console-button" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="scanning-progress" class="scanning-progress hidden">
+                                <ui:Label name="scanning-label" text="Scanning..." class="scanning-text" />
+                                <ui:Button name="cancel-scan-button" text="Cancel" class="console-button" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="remote-apps-container" class="apps-container">
+                        <!-- Will be populated dynamically -->
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                
+            </ui:ScrollView>
+        </ui:VisualElement>
+        
+        <!-- Right Panel - System Info Panel -->
+        <ui:VisualElement name="system-info-panel" class="system-info-panel hidden">
+            <ui:VisualElement class="system-info-header">
+                <ui:Label text="System Information" class="system-info-title" />
+                <ui:Button name="close-system-info-button" text="✕" class="close-button" />
+            </ui:VisualElement>
+            
+            <ui:ScrollView class="system-info-scroll">
+                <ui:VisualElement name="system-info-content" class="system-info-content">
+                    <!-- System info items will be populated dynamically -->
+                </ui:VisualElement>
+            </ui:ScrollView>
+        </ui:VisualElement>
+        
+    </ui:VisualElement>
+</ui:UXML>

@@ -211,27 +211,38 @@ namespace SPlugin
 
         private LogItem FindEqualItemFromFilteredBufferList(LogItem targetLogItem_)
         {
+            if (targetLogItem_ == null) return null;
+            
             foreach (LogItem item in _filteredBufferList)
             {
+                if (item == null) continue;
+                
                 if (targetLogItem_.LineNumber != item.LineNumber)
                     continue;
 
-                if (targetLogItem_.ObjectName.GetHashCode() != item.ObjectName.GetHashCode())
+                // Null-safe string comparisons
+                string targetObjectName = targetLogItem_.ObjectName ?? string.Empty;
+                string itemObjectName = item.ObjectName ?? string.Empty;
+                if (targetObjectName.GetHashCode() != itemObjectName.GetHashCode())
                     continue;
 
-                if (targetLogItem_.FilePath.GetHashCode() != item.FilePath.GetHashCode())
+                string targetFilePath = targetLogItem_.FilePath ?? string.Empty;
+                string itemFilePath = item.FilePath ?? string.Empty;
+                if (targetFilePath.GetHashCode() != itemFilePath.GetHashCode())
                     continue;
 
-                if (targetLogItem_.LogData.GetHashCode() != item.LogData.GetHashCode())
+                string targetLogData = targetLogItem_.LogData ?? string.Empty;
+                string itemLogData = item.LogData ?? string.Empty;
+                if (targetLogData.GetHashCode() != itemLogData.GetHashCode())
                     continue;
 
-                if (false == targetLogItem_.ObjectName.Equals(item.ObjectName))
+                if (!targetObjectName.Equals(itemObjectName))
                     continue;
 
-                if (false == targetLogItem_.FilePath.Equals(item.FilePath))
+                if (!targetFilePath.Equals(itemFilePath))
                     continue;
 
-                if (true == targetLogItem_.LogData.Equals(item.LogData))
+                if (targetLogData.Equals(itemLogData))
                     return item;
             }
             return null;

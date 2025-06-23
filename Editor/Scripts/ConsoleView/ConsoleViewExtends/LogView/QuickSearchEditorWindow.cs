@@ -5,83 +5,134 @@ using System.Collections.Generic;
 using SPlugin;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class QuickSearchEditorWindow : EditorWindow
 {
-    private string _searchString = string.Empty;
-    private bool _requestSearchString = false;
+    // Static event for notifying LogView when quick search list changes
+    public static System.Action OnQuickSearchChanged;
+    
+    private VisualElement _rootElement;
+    private TextField _searchInput;
+    private Button _addButton;
+    private VisualElement _searchList;
+    private List<ConsoleEditorPrefsSearchContext> _searchItems = new List<ConsoleEditorPrefsSearchContext>();
 
-    void OnGUI()
+    private void CreateGUI()
     {
-        GUILayout.BeginVertical();
-
-        OnGuiSearchList();
-
-        GUILayout.EndVertical();
+        titleContent = new GUIContent("Quick Search");
+        CreateUIElements();
+        BindEvents();
+        RefreshSearchList();
     }
 
-    private void OnGuiSearchList()
+    private void CreateUIElements()
     {
-        GUILayout.BeginVertical();
-        const int SPACE_PIXELS = 20;
-
-        string tempContent = "Quick Search String";
-        tempContent = SGuiUtility.ReplaceBoldString(tempContent);
-        GUILayout.Box(tempContent, SGuiStyle.BoxStyle, GUILayout.ExpandWidth(true));
-
-        GUILayout.BeginHorizontal();
-        GUILayout.Space(SPACE_PIXELS);
-        GUI.SetNextControlName(ConsoleViewNameDefines.GuiControllerUniqueName.PreferenceName.TEXT_FIELD_ADD_SEARCH);
-        _searchString = GUILayout.TextField(_searchString, GUILayout.MinWidth(200f));
-
-        if (Event.current.type == EventType.Repaint)
+        // Load UXML template
+        var visualTree = UnityEngine.Resources.Load<VisualTreeAsset>("UI/QuickSearchEditorWindow");
+        if (visualTree == null)
         {
-            if (true == ConsoleViewNameDefines.GuiControllerUniqueName.PreferenceName.TEXT_FIELD_ADD_SEARCH.Equals(GUI.GetNameOfFocusedControl()))
+            UnityEngine.Debug.LogError("QuickSearchEditorWindow.uxml not found in Resources/UI/");
+            return;
+        }
+
+        _rootElement = visualTree.Instantiate();
+        rootVisualElement.Add(_rootElement);
+
+        // Load USS styles
+        var baseStyles = UnityEngine.Resources.Load<StyleSheet>("UI/BaseStyles");
+        var quickSearchStyles = UnityEngine.Resources.Load<StyleSheet>("UI/QuickSearchEditorWindowStyles");
+        
+        if (baseStyles != null)
+        {
+            rootVisualElement.styleSheets.Add(baseStyles);
+        }
+        if (quickSearchStyles != null)
+        {
+            rootVisualElement.styleSheets.Add(quickSearchStyles);
+        }
+
+        // Get references to UI elements
+        _searchInput = _rootElement.Q<TextField>("search-input");
+        _addButton = _rootElement.Q<Button>("add-button");
+        _searchList = _rootElement.Q<VisualElement>("search-list");
+    }
+
+    private void BindEvents()
+    {
+        // Add button click
+        _addButton?.RegisterCallback<ClickEvent>(evt =>
+        {
+            AddSearchString();
+        });
+
+        // Enter key in text field
+        _searchInput?.RegisterCallback<KeyDownEvent>(evt =>
+        {
+            if (evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.KeypadEnter)
             {
-                SGuiUtility.OnGuiCheckTextFieldCopyAndPaste(ref _searchString);
+                AddSearchString();
+                evt.StopPropagation();
             }
-        }
+        });
+    }
 
-        if (true == ConsoleViewNameDefines.GuiControllerUniqueName.PreferenceName.TEXT_FIELD_ADD_SEARCH.Equals(GUI.GetNameOfFocusedControl()) &&
-            EventType.KeyUp == Event.current.type && KeyCode.Return == Event.current.keyCode)
+    private void AddSearchString()
+    {
+        string searchText = _searchInput?.value?.Trim();
+        if (!string.IsNullOrEmpty(searchText))
         {
-            _requestSearchString = true;
+            ConsoleEditorPrefs.AddQuickSearchString(searchText);
+            _searchInput.value = string.Empty;
+            RefreshSearchList();
+            
+            // Notify LogView that quick search list has changed
+            OnQuickSearchChanged?.Invoke();
         }
+    }
 
-        if (true == GUILayout.Button("Add String", GUILayout.Width(80f)) ||
-            (true == _requestSearchString && EventType.KeyUp != Event.current.type))
-        {
-            ConsoleEditorPrefs.AddQuickSearchString(_searchString);
-            _searchString = string.Empty;
-            _requestSearchString = false;
-        }
+    private void RefreshSearchList()
+    {
+        if (_searchList == null) return;
 
-        GUILayout.EndHorizontal();
+        // Clear existing items
+        _searchList.Clear();
+        _searchItems.Clear();
 
+        // Add current search items
         int filterCount = ConsoleEditorPrefs.GetQuickSearchListCount();
-        List<ConsoleEditorPrefsSearchContext> removeList = new List<ConsoleEditorPrefsSearchContext>();
         for (int filterIndex = 0; filterIndex < filterCount; filterIndex++)
         {
             ConsoleEditorPrefsSearchContext filterContext = ConsoleEditorPrefs.GetQuickSearchContext(filterIndex);
-            if (null != filterContext)
+            if (filterContext != null)
             {
-                GUILayout.BeginHorizontal();
-                GUILayout.Space(SPACE_PIXELS);
-                GUILayout.Label(filterContext.SearchString);
-                if (true == GUILayout.Button("Delete", GUILayout.Width(80f)))
-                {
-                    removeList.Add(filterContext);
-                }
-
-                GUILayout.EndHorizontal();
+                _searchItems.Add(filterContext);
+                CreateSearchItem(filterContext);
             }
         }
+    }
 
-        foreach (ConsoleEditorPrefsSearchContext searchData in removeList)
+    private void CreateSearchItem(ConsoleEditorPrefsSearchContext searchContext)
+    {
+        var itemContainer = new VisualElement();
+        itemContainer.AddToClassList("quick-search-item");
+
+        var label = new Label(searchContext.SearchString);
+        label.AddToClassList("quick-search-item-label");
+
+        var deleteButton = new Button(() =>
         {
-            ConsoleEditorPrefs.RemoveQuickSearchString(searchData.SearchString);
-        }
+            ConsoleEditorPrefs.RemoveQuickSearchString(searchContext.SearchString);
+            RefreshSearchList();
+            
+            // Notify LogView that quick search list has changed
+            OnQuickSearchChanged?.Invoke();
+        });
+        deleteButton.text = "Delete";
+        deleteButton.AddToClassList("quick-search-delete-btn");
 
-        GUILayout.EndVertical();
+        itemContainer.Add(label);
+        itemContainer.Add(deleteButton);
+        _searchList.Add(itemContainer);
     }
 }

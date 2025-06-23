@@ -1,8 +1,9 @@
-﻿// 
+// 
 // Copyright 2015 https://github.com/hope1026
 
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace SPlugin
 {
@@ -11,26 +12,79 @@ namespace SPlugin
         private readonly List<LogItem> _systemLogList = new List<LogItem>();
         private readonly List<LogItem> _drawLogList = new List<LogItem>();
         private bool _changedLogList = false;
-        private Rect _drawRect = new Rect();
         private bool _showAble = false;
 
-        public void OnGuiCustom()
+        private VisualElement _rootElement;
+        private VisualElement _overlayElement;
+        private VisualElement _messageContainer;
+        private Button _closeButton;
+
+        public void Initialize(VisualElement rootContainer_)
         {
-            if (true == _showAble)
+            CreateUIElements(rootContainer_);
+            BindEvents();
+        }
+
+        private void CreateUIElements(VisualElement rootContainer_)
+        {
+            // Load UXML template
+            var visualTree = Resources.Load<VisualTreeAsset>("UI/SystemMessageView");
+            if (visualTree == null)
             {
-                GUI.FocusWindow(ConsoleViewLayoutDefines.WindowID.SYSTEM_MESSAGE_VIEW);
-                _drawRect.Set(ConsoleViewLayoutDefines.LogListWidget.Area.logListAreaRect.xMin + (ConsoleViewLayoutDefines.LogListWidget.Area.logListAreaRect.width * 0.1f),
-                              ConsoleViewLayoutDefines.LogListWidget.Area.logListAreaRect.yMin + (ConsoleViewLayoutDefines.LogListWidget.Area.logListAreaRect.height * 0.2f),
-                              ConsoleViewLayoutDefines.LogListWidget.Area.logListAreaRect.xMax - (ConsoleViewLayoutDefines.LogListWidget.Area.logListAreaRect.width * 0.2f),
-                              ConsoleViewLayoutDefines.LogListWidget.Area.logListAreaRect.yMax - (ConsoleViewLayoutDefines.LogListWidget.Area.logListAreaRect.height * 0.4f));
-                GUILayout.Window(ConsoleViewLayoutDefines.WindowID.SYSTEM_MESSAGE_VIEW, _drawRect,
-                                 _HandleOnGuiLogListWindow, ConsoleViewNameDefines.Window.SYSTEM_MESSAGE);
+                Debug.LogError("SystemMessageView.uxml not found in Resources/UI/");
+                return;
             }
+
+            _rootElement = visualTree.Instantiate();
+
+            // Load USS styles
+            var baseStyles = Resources.Load<StyleSheet>("UI/BaseStyles");
+            var systemMessageStyles = Resources.Load<StyleSheet>("UI/SystemMessageViewStyles");
+            
+            if (baseStyles != null)
+            {
+                _rootElement.styleSheets.Add(baseStyles);
+            }
+            if (systemMessageStyles != null)
+            {
+                _rootElement.styleSheets.Add(systemMessageStyles);
+            }
+
+            // Get references to UI elements
+            _overlayElement = _rootElement.Q<VisualElement>("system-message-overlay");
+            _messageContainer = _rootElement.Q<VisualElement>("message-container");
+            _closeButton = _rootElement.Q<Button>("close-button");
+
+            // Add to root container
+            rootContainer_.Add(_rootElement);
+
+            // Initially hidden
+            Hide();
+        }
+
+        private void BindEvents()
+        {
+            // Close button click
+            _closeButton?.RegisterCallback<ClickEvent>(_ =>
+            {
+                Hide();
+                ClearMessages();
+            });
+
+            // Click anywhere on overlay to close
+            _overlayElement?.RegisterCallback<ClickEvent>(evt_ =>
+            {
+                if (evt_.target == _overlayElement)
+                {
+                    Hide();
+                    ClearMessages();
+                }
+            });
         }
 
         public void UpdateCustom()
         {
-            if (true == _changedLogList)
+            if (_changedLogList)
             {
                 lock (_systemLogList)
                 {
@@ -38,49 +92,93 @@ namespace SPlugin
                     _systemLogList.Clear();
                     _showAble = true;
                     _changedLogList = false;
+                    
+                    // Update UI
+                    UpdateMessageDisplay();
+                    Show();
                 }
             }
         }
 
-        private void _HandleOnGuiLogListWindow(int windowID_)
+        private void UpdateMessageDisplay()
         {
-            if (Event.current.type == EventType.Layout || Event.current.type == EventType.Repaint)
+            if (_messageContainer == null) return;
+
+            // Clear existing messages
+            _messageContainer.Clear();
+
+            // Add new messages
+            foreach (var logItem in _drawLogList)
             {
-                int count = _drawLogList.Count;
-                for (int index = 0; index < count; index++)
-                {
-                    GUILayout.Label(new GUIContent(_drawLogList[index].LogData), SGuiStyle.LabelStyle);
-                }
+                var messageElement = CreateMessageElement(logItem);
+                _messageContainer.Add(messageElement);
+            }
+        }
+
+        private VisualElement CreateMessageElement(LogItem logItem_)
+        {
+            var messageElement = new Label();
+            messageElement.AddToClassList("system-message-item");
+            
+            // Apply color based on log type
+            string coloredText = logItem_.LogData;
+            switch (logItem_.LogType)
+            {
+                case LogType.Log:
+                    coloredText = ColorUtility.ReplaceColorString(coloredText, ConsoleEditorPrefs.LogTextColor);
+                    break;
+                case LogType.Warning:
+                    coloredText = ColorUtility.ReplaceColorString(coloredText, ConsoleEditorPrefs.WarningTextColor);
+                    break;
+                case LogType.Error:
+                    coloredText = ColorUtility.ReplaceColorString(coloredText, ConsoleEditorPrefs.ErrorTextColor);
+                    break;
             }
 
-            if (Event.current.type == EventType.MouseUp && _drawRect.Contains(Event.current.mousePosition))
+            messageElement.text = coloredText;
+            return messageElement;
+        }
+
+        private void Show()
+        {
+            if (_overlayElement != null)
             {
-                _showAble = false;
-                _drawLogList.Clear();
+                _overlayElement.style.display = DisplayStyle.Flex;
+                _showAble = true;
             }
+        }
+
+        private void Hide()
+        {
+            if (_overlayElement != null)
+            {
+                _overlayElement.style.display = DisplayStyle.None;
+                _showAble = false;
+            }
+        }
+
+        private void ClearMessages()
+        {
+            _drawLogList.Clear();
+            _messageContainer?.Clear();
         }
 
         public void AddSystemLogData(LogItem logData_)
         {
-            if (false == ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_SYSTEM_MESSAGE))
+            if (!ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_SYSTEM_MESSAGE))
                 return;
 
+            // Apply color formatting to log data
             switch (logData_.LogType)
             {
                 case LogType.Log:
-                {
-                    logData_.LogData = SGuiUtility.ReplaceColorString(logData_.LogData, ConsoleEditorPrefs.LogTextColor);
-                }
+                    logData_.LogData = ColorUtility.ReplaceColorString(logData_.LogData, ConsoleEditorPrefs.LogTextColor);
                     break;
                 case LogType.Warning:
-                {
-                    logData_.LogData = SGuiUtility.ReplaceColorString(logData_.LogData, ConsoleEditorPrefs.WarningTextColor);
-                }
+                    logData_.LogData = ColorUtility.ReplaceColorString(logData_.LogData, ConsoleEditorPrefs.WarningTextColor);
                     break;
                 case LogType.Error:
-                {
-                    logData_.LogData = SGuiUtility.ReplaceColorString(logData_.LogData, ConsoleEditorPrefs.ErrorTextColor);
-                }
+                    logData_.LogData = ColorUtility.ReplaceColorString(logData_.LogData, ConsoleEditorPrefs.ErrorTextColor);
                     break;
             }
 
@@ -89,6 +187,19 @@ namespace SPlugin
                 _systemLogList.Add(logData_);
                 _changedLogList = true;
             }
+        }
+
+        public bool IsVisible => _showAble;
+
+        public VisualElement GetRootElement()
+        {
+            return _rootElement;
+        }
+
+        public void Terminate()
+        {
+            _rootElement?.RemoveFromHierarchy();
+            _rootElement = null;
         }
     }
 }

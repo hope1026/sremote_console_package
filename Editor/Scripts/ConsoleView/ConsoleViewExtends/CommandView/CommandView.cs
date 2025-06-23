@@ -1,160 +1,292 @@
-﻿// 
+// 
 // Copyright 2015 https://github.com/hope1026
 
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace SPlugin
 {
     internal class CommandView : ConsoleViewAbstract
     {
         public override ConsoleViewType ConsoleViewType => ConsoleViewType.COMMAND;
-        private readonly SGuiDragLine _commandNameDragLine = new SGuiDragLine();
+
+        private VisualElement _rootElement;
+        private VisualElement _noCommandsMessage;
+        private VisualElement _commandsInterface;
+        private VisualElement _categoryTabs;
+        private VisualElement _commandsList;
+
         private string _selectedCategoryName = string.Empty;
+        private readonly List<Button> _categoryButtons = new List<Button>();
+        private int _lastCommandCollectionCount = -1;
+        private int _lastCategoryCount = -1;
+
+        protected override void OnInitialize()
+        {
+            CreateUIElements();
+            UpdateCommandsDisplay();
+        }
 
         protected override void OnShow()
         {
-            ConsoleViewLayoutDefines.CommandView.OnChangeWindowSize();
+            UpdateCommandsDisplay();
         }
 
-        public override void OnGuiCustom()
+        private void CreateUIElements()
         {
-            SGuiStyle.ActiveAppLabelStyle.fontStyle = FontStyle.Bold;
-            SGuiStyle.ActiveAppLabelStyle.fontSize = 20;
-
-            if (CurrentAppRef != null && CurrentAppRef.IsPlaying() == false)
+            // Load UXML template
+            var visualTree = Resources.Load<VisualTreeAsset>("UI/CommandView");
+            if (visualTree == null)
             {
-                GUILayout.BeginVertical();
-                GUILayout.Space(20);
-                GUILayout.Label("Command feature is valid in play mode.", SGuiStyle.ActiveAppLabelStyle);
-                GUILayout.EndVertical();
-                return;
-            }
-            else if (CurrentAppRef == null || CurrentAppRef.commandCollection.commandsByCategory.Count <= 0)
-            {
-                GUILayout.BeginVertical();
-                GUILayout.Space(20);
-                GUILayout.Label("You can add commands using the functions below.", SGuiStyle.ActiveAppLabelStyle);
-                GUILayout.Label("SCommand.Register(categoryName, commandName, defaultValue, onChangedValueDelegate, displayPriority, tooltip)", SGuiStyle.LabelStyle);
-                GUILayout.EndVertical();
+                Debug.LogError("CommandView.uxml not found in Resources/UI/");
                 return;
             }
 
-            GUILayout.BeginArea(ConsoleViewLayoutDefines.CommandView.categoryTapAreaRect);
-            OnGuiCategoryTaps();
-            GUILayout.EndArea();
+            _rootElement = visualTree.Instantiate();
 
-            GUILayout.BeginArea(ConsoleViewLayoutDefines.CommandView.commandListAreaRect);
-            OnGuiCommandList();
-            OnGuiVerticalDragLine();
-            GUILayout.EndArea();
+            // Load USS styles
+            var baseStyles = Resources.Load<StyleSheet>("UI/BaseStyles");
+            var commandViewStyles = Resources.Load<StyleSheet>("UI/CommandViewStyles");
+            
+            if (baseStyles != null)
+            {
+                _rootElement.styleSheets.Add(baseStyles);
+            }
+            if (commandViewStyles != null)
+            {
+                _rootElement.styleSheets.Add(commandViewStyles);
+            }
+
+            // Get references to UI elements
+            _noCommandsMessage = _rootElement.Q<VisualElement>("no-commands-message");
+            _commandsInterface = _rootElement.Q<VisualElement>("commands-interface");
+            _categoryTabs = _rootElement.Q<VisualElement>("category-tabs");
+            _commandsList = _rootElement.Q<VisualElement>("commands-list");
         }
 
-        private void OnGuiCategoryTaps()
+        public override void UpdateCustom()
         {
-            GUILayout.BeginVertical();
-            GUILayout.BeginHorizontal();
+            CheckAndUpdateCommandsDisplay();
+        }
 
-            int lineCount = 1;
-            float lineWidth = 0f;
-            float lineWidthMax = ConsoleViewLayoutDefines.CommandView.areaRect.width;
+        private void CheckAndUpdateCommandsDisplay()
+        {
+            if (CurrentAppRef == null)
+            {
+                // Reset counters when no app
+                _lastCommandCollectionCount = -1;
+                _lastCategoryCount = -1;
+                UpdateCommandsDisplay();
+                return;
+            }
 
-            const int WIDTH_PER_CHARACTER = 12;
+            // Check if command collection has changed
+            var commandsByCategory = CurrentAppRef.commandCollection.commandsByCategory;
+            int totalCommandCount = 0;
+            foreach (var categoryCommands in commandsByCategory.Values)
+            {
+                totalCommandCount += categoryCommands.Count;
+            }
 
-            SGuiStyle.ButtonStyle.margin.left = 0;
-            SGuiStyle.ButtonStyle.margin.right = 0;
+            bool commandsChanged = _lastCommandCollectionCount != totalCommandCount || _lastCategoryCount != commandsByCategory.Count;
+            
+            if (commandsChanged)
+            {
+                _lastCommandCollectionCount = totalCommandCount;
+                _lastCategoryCount = commandsByCategory.Count;
+                UpdateCommandsDisplay();
+            }
+        }
 
-            Dictionary<string, List<CommandItemAbstract>> commandsByCategory = CurrentAppRef.commandCollection.commandsByCategory;
+        private void UpdateCommandsDisplay()
+        {
+            if (CurrentAppRef == null || !CurrentAppRef.IsPlaying())
+            {
+                ShowNoCommandsMessage("Command feature is valid in play mode.");
+                return;
+            }
+
+            if (CurrentAppRef.commandCollection.commandsByCategory.Count <= 0)
+            {
+                ShowNoCommandsMessage("You can add commands using SCommand.Register()");
+                return;
+            }
+
+            ShowCommandsInterface();
+            UpdateCategoryTabs();
+            UpdateCommandsList();
+        }
+
+        private void ShowNoCommandsMessage(string message)
+        {
+            if (_noCommandsMessage != null)
+            {
+                _noCommandsMessage.style.display = DisplayStyle.Flex;
+                var titleLabel = _noCommandsMessage.Q<Label>("no-commands-title");
+                if (titleLabel != null)
+                {
+                    titleLabel.text = message;
+                }
+            }
+            
+            if (_commandsInterface != null)
+            {
+                _commandsInterface.style.display = DisplayStyle.None;
+            }
+        }
+
+        private void ShowCommandsInterface()
+        {
+            if (_noCommandsMessage != null)
+            {
+                _noCommandsMessage.style.display = DisplayStyle.None;
+            }
+            
+            if (_commandsInterface != null)
+            {
+                _commandsInterface.style.display = DisplayStyle.Flex;
+            }
+        }
+
+        private void UpdateCategoryTabs()
+        {
+            if (_categoryTabs == null || CurrentAppRef == null) return;
+
+            _categoryTabs.Clear();
+            _categoryButtons.Clear();
+
+            var commandsByCategory = CurrentAppRef.commandCollection.commandsByCategory;
+            
             foreach (string categoryName in commandsByCategory.Keys)
             {
                 if (string.IsNullOrEmpty(_selectedCategoryName))
-                    _selectedCategoryName = categoryName;
-
-                lineWidth += categoryName.Length * WIDTH_PER_CHARACTER + 20f;
-                if (lineWidthMax <= lineWidth)
-                {
-                    lineCount++;
-                    GUILayout.EndHorizontal();
-                    GUILayout.BeginHorizontal();
-                    lineWidth = 0;
-                }
-
-                GUILayoutOption widthOption = GUILayout.ExpandWidth(true);
-                GUILayoutOption heightOption = GUILayout.Height(ConsoleViewLayoutDefines.CommandView.CATEGORY_TAP_LINE_HEIGHT);
-
-                bool prevSelected = _selectedCategoryName.Equals(categoryName);
-                if (GUILayout.Toggle(prevSelected, categoryName, SGuiStyle.ButtonStyle, widthOption, heightOption))
                 {
                     _selectedCategoryName = categoryName;
                 }
-            }
 
-            GUILayout.EndHorizontal();
-            GUILayout.EndVertical();
+                var categoryButton = new Button();
+                categoryButton.text = categoryName;
+                categoryButton.AddToClassList("category-tab-button");
+                
+                if (_selectedCategoryName.Equals(categoryName))
+                {
+                    categoryButton.AddToClassList("selected");
+                }
 
-            if (ConsoleViewLayoutDefines.CommandView.categoryLineCount != lineCount)
-            {
-                ConsoleViewLayoutDefines.CommandView.categoryLineCount = lineCount;
-                ConsoleViewLayoutDefines.CommandView.OnChangeWindowSize();
+                _categoryTabs.Add(categoryButton);
+                _categoryButtons.Add(categoryButton);
+                
+                // Bind click event directly
+                categoryButton.RegisterCallback<ClickEvent>(_ => {
+                    SelectCategory(categoryName);
+                });
             }
         }
 
-        private void OnGuiVerticalDragLine()
+        private void SelectCategory(string categoryName)
         {
-            SGuiStyle.LineStyle.normal.background = EditorGUIUtility.whiteTexture;
-            Color lineColor = new Color(0.15f, 0.15f, 0.15f);
+            if (_selectedCategoryName == categoryName) return;
 
-            Rect dragLineRect = new Rect(ConsoleViewLayoutDefines.CommandView.commandNameDragLineRect);
-            Vector2 mousePosition = Vector2.zero;
-            Rect collisionOffset = new Rect(-5f, 0f, 10f, 0f);
-            if (_commandNameDragLine.OnGuiCustom(ref mousePosition, dragLineRect, collisionOffset, lineColor, SGuiStyle.LineStyle, true))
+            _selectedCategoryName = categoryName;
+            
+            // Update button states
+            foreach (var button in _categoryButtons)
             {
-                const float COMMAND_NAME_WIDTH_MIN = 100f;
-                if (COMMAND_NAME_WIDTH_MIN <= mousePosition.x)
+                button.RemoveFromClassList("selected");
+                if (button.text == categoryName)
                 {
-                    ConsoleViewLayoutDefines.CommandView.commandNameDragLineRect.xMin = mousePosition.x;
-                    ConsoleViewLayoutDefines.CommandView.commandNameDragLineRect.width = 1f;
+                    button.AddToClassList("selected");
                 }
             }
 
-            SGuiStyle.LineStyle.normal.background = GUI.skin.box.normal.background;
+            UpdateCommandsList();
         }
 
-        private void OnGuiCommandList()
+        private void UpdateCommandsList()
         {
-            GUILayout.BeginVertical();
+            if (_commandsList == null || CurrentAppRef == null) return;
 
-            GUILayout.BeginHorizontal();
+            _commandsList.Clear();
 
-            string context = "CommandName";
-            context = SGuiUtility.ReplaceBoldString(context);
-            GUILayout.Label(context, SGuiStyle.BoxStyle, GUILayout.Width(ConsoleViewLayoutDefines.CommandView.commandNameDragLineRect.xMin));
-
-            context = "CommandValue";
-            context = SGuiUtility.ReplaceBoldString(context);
-            GUILayout.Label(context, SGuiStyle.BoxStyle, GUILayout.ExpandWidth(expand: true));
-
-            GUILayout.EndHorizontal();
-            GUILayout.EndVertical();
-
-            if (string.IsNullOrEmpty(_selectedCategoryName))
-                return;
+            if (string.IsNullOrEmpty(_selectedCategoryName)) return;
 
             if (!CurrentAppRef.commandCollection.commandsByCategory.TryGetValue(_selectedCategoryName, out List<CommandItemAbstract> commandItemList) ||
                 commandItemList == null ||
                 commandItemList.Count <= 0)
+            {
                 return;
-
-            GUILayout.BeginVertical();
-            GUILayout.Space(5);
+            }
 
             foreach (CommandItemAbstract commandItem in commandItemList)
             {
-                commandItem.OnGui(ConsoleViewLayoutDefines.CommandView.commandNameDragLineRect.xMin);
+                var commandElement = CreateCommandElement(commandItem);
+                _commandsList.Add(commandElement);
+                
+                // Schedule value update after the element is added to the hierarchy
+                _commandsList.schedule.Execute(() => {
+                    var valueContainer = commandElement.Q<VisualElement>("command-value-container");
+                    if (valueContainer != null && valueContainer.childCount > 0)
+                    {
+                        commandItem.UpdateUIToolkitValue(valueContainer[0]);
+                    }
+                });
+            }
+        }
+
+        private VisualElement CreateCommandElement(CommandItemAbstract commandItem)
+        {
+            var commandContainer = new VisualElement();
+            commandContainer.AddToClassList("command-item");
+
+            // Command name
+            var nameLabel = new Label(commandItem.CommandName);
+            nameLabel.AddToClassList("command-name-label");
+            nameLabel.style.minWidth = 200;
+            commandContainer.Add(nameLabel);
+
+            // Command value container
+            var valueContainer = new VisualElement();
+            valueContainer.name = "command-value-container";
+            valueContainer.AddToClassList("command-value-container");
+
+            // Create control using the command item's own method
+            VisualElement valueControl = commandItem.CreateUIToolkitControl();
+            if (valueControl != null)
+            {
+                valueContainer.Add(valueControl);
+                
+                // Schedule event binding after the control is added to the hierarchy
+                valueContainer.schedule.Execute(() => {
+                    commandItem.BindUIToolkitEvents(valueControl);
+                });
             }
 
-            GUILayout.EndVertical();
+            commandContainer.Add(valueContainer);
+
+            // Tooltip
+            if (!string.IsNullOrEmpty(commandItem.ToolTip))
+            {
+                commandContainer.tooltip = commandItem.ToolTip;
+            }
+
+            return commandContainer;
+        }
+
+        public VisualElement GetRootElement()
+        {
+            if (_rootElement == null)
+            {
+                CreateUIElements();
+            }
+            return _rootElement;
+        }
+
+        protected override void OnTerminate()
+        {
+            _rootElement?.RemoveFromHierarchy();
+            _rootElement = null;
+            _categoryButtons.Clear();
         }
     }
 }

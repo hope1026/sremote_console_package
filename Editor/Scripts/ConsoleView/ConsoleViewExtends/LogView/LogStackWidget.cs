@@ -1,115 +1,175 @@
-﻿// 
+// 
 // Copyright 2015 https://github.com/hope1026
 
-using System;
-using System.IO;
-using UnityEditor;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace SPlugin
 {
     internal class LogStackWidget
     {
-        private LogItem _selectedLogItem = null;
-        private LogItem.StackContext _selectedStackContext = null;
-        private bool _drawStackItemMenuPopup = false;
-        private Vector2 _scrollPos;
+        private ScrollView _stackTraceScroll;
+        private LogItem _selectedLogItem;
 
-        public void ChangeSelectedLogItem(LogItem logItem_)
+        public void Initialize(VisualElement rootElement_)
         {
-            _selectedLogItem = logItem_;
-        }
-
-        public void OnGuiCustom()
-        {
-            if (_selectedLogItem == null)
-                return;
-
-            UnityEngine.Event currentEvent = Event.current;
-            GUILayout.BeginArea(ConsoleViewLayoutDefines.LogListWidget.Area.areaStackTraceRect);
-
-            _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
-            OnGuiStackTrace(_selectedLogItem);
-
-            EditorGUILayout.EndScrollView();
-
-            OnGuiContextMenuIfAble();
-
-            GUILayout.EndArea();
-        }
-
-        private void OnGuiStackTrace(LogItem logItem_)
-        {
-            if (null == logItem_ || logItem_.StackList.Count <= 0)
-                return;
-
-            SGuiStyle.StackTextStyle.richText = true;
-            foreach (LogItem.StackContext stackContext in logItem_.StackList)
+            _stackTraceScroll = rootElement_.Q<ScrollView>("stack-trace-scroll");
+            if (_stackTraceScroll == null)
             {
-                EditorGUILayout.LabelField(stackContext.DisplayStackString, SGuiStyle.StackTextStyle);
-                Rect labelRect = GUILayoutUtility.GetLastRect();
-
-                if (Event.current.type == EventType.MouseDown &&
-                    Event.current.button == 0 && 2 == Event.current.clickCount &&
-                    labelRect.Contains(Event.current.mousePosition))
-                {
-                    LogItem.OpenStackTraceFile(stackContext.FilePath, stackContext.LineNumber);
-                    Event.current.Use();
-                }
-                else if (Event.current.type == EventType.MouseUp && Event.current.button == 1 &&
-                         labelRect.Contains(Event.current.mousePosition))
-                {
-                    _selectedStackContext = stackContext;
-                    _drawStackItemMenuPopup = true;
-                }
+                Debug.LogError("Stack trace scroll element not found!");
             }
         }
 
-        private void OnGuiContextMenuIfAble()
+        public void UpdateStackTrace(LogItem selectedLogItem_)
         {
-            if (true == _drawStackItemMenuPopup && null != _selectedStackContext)
+            _selectedLogItem = selectedLogItem_;
+            
+            if (_stackTraceScroll == null)
             {
-                GenericMenu stackItemMenu = new GenericMenu();
-                if (true == File.Exists(_selectedStackContext.FilePath))
+                Debug.LogError("Stack trace scroll is null!");
+                return;
+            }
+
+            // Clear existing content
+            _stackTraceScroll.Clear();
+
+            if (_selectedLogItem == null)
+            {
+                var noSelectionLabel = new Label("No log selected");
+                noSelectionLabel.AddToClassList("stack-trace-content");
+                _stackTraceScroll.Add(noSelectionLabel);
+                return;
+            }
+
+            // Use the same logic as IMGUI version - display formatted stack trace
+            if (_selectedLogItem.StackList != null && _selectedLogItem.StackList.Count > 0)
+            {
+                foreach (var stackContext in _selectedLogItem.StackList)
                 {
-                    stackItemMenu.AddItem(new GUIContent("Open Source File"), false, OnStackItemMenuOpenSourceFileHandler);
+                    string displayText = "";
+                    
+                    // Use OriginalStackString instead of DisplayStackString to avoid HTML parsing issues
+                    if (!string.IsNullOrEmpty(stackContext.OriginalStackString))
+                    {
+                        displayText = stackContext.OriginalStackString;
+                    }
+                    else if (!string.IsNullOrEmpty(stackContext.DisplayStackString))
+                    {
+                        // Clean HTML tags from DisplayStackString if we must use it
+                        displayText = CleanHtmlTags(stackContext.DisplayStackString);
+                    }
+
+                    if (!string.IsNullOrEmpty(displayText))
+                    {
+                        var stackLabel = new Label(displayText);
+                        stackLabel.AddToClassList("stack-trace-line");
+                        
+                        // Make it clickable if there's a file path
+                        if (!string.IsNullOrEmpty(stackContext.FilePath))
+                        {
+                            stackLabel.AddToClassList("stack-trace-clickable");
+                            
+                            // Add double-click handler to open source file
+                            stackLabel.RegisterCallback<MouseDownEvent>(evt_ => {
+                                if (evt_.clickCount == 2 && evt_.button == 0)
+                                {
+                                    LogItem.OpenStackTraceFile(stackContext.FilePath, stackContext.LineNumber);
+                                    evt_.StopPropagation();
+                                }
+                            });
+                            
+                            // Add right-click context menu
+                            stackLabel.RegisterCallback<MouseUpEvent>(evt_ => {
+                                if (evt_.button == 1) // Right click
+                                {
+                                    ShowStackTraceContextMenu(stackContext);
+                                    evt_.StopPropagation();
+                                }
+                            });
+                        }
+                        
+                        _stackTraceScroll.Add(stackLabel);
+                    }
+                }
+                
+                if (_selectedLogItem.StackList.Count == 0)
+                {
+                    var noStackLabel = new Label("No stack trace available");
+                    noStackLabel.AddToClassList("stack-trace-content");
+                    _stackTraceScroll.Add(noStackLabel);
+                }
+            }
+            else
+            {
+                // Fallback to original StackString if StackList is not available
+                string stackTrace = _selectedLogItem.StackString ?? "";
+                if (string.IsNullOrEmpty(stackTrace))
+                {
+                    stackTrace = "No stack trace available";
+                }
+                
+                var stackLabel = new Label(stackTrace);
+                stackLabel.AddToClassList("stack-trace-content");
+                _stackTraceScroll.Add(stackLabel);
+            }
+        }
+
+        private string CleanHtmlTags(string input_)
+        {
+            if (string.IsNullOrEmpty(input_)) return input_;
+            
+            // Remove HTML tags using simple string replacement
+            // This is safer than regex for this specific case
+            string result = input_;
+            
+            // Remove <a> tags but keep the content
+            int startIndex = 0;
+            while ((startIndex = result.IndexOf("<a ", startIndex)) != -1)
+            {
+                int endIndex = result.IndexOf(">", startIndex);
+                if (endIndex != -1)
+                {
+                    result = result.Remove(startIndex, endIndex - startIndex + 1);
                 }
                 else
                 {
-                    stackItemMenu.AddDisabledItem(new GUIContent("Open Source File"));
+                    break; // Malformed tag, stop processing
                 }
-
-                stackItemMenu.AddItem(new GUIContent("Copy Selected"), false, OnStackItemMenuCopySelectedHandler);
-                stackItemMenu.AddItem(new GUIContent("Copy All"), false, OnStackItemMenuCopyAllHandler);
-
-                stackItemMenu.ShowAsContext();
-                _drawStackItemMenuPopup = false;
             }
+            
+            // Remove closing </a> tags
+            result = result.Replace("</a>", "");
+            
+            return result;
         }
 
-        private void OnStackItemMenuCopyAllHandler()
+        private void ShowStackTraceContextMenu(LogItem.StackContext stackContext_)
         {
-            if (null != _selectedLogItem)
+            var menu = new UnityEditor.GenericMenu();
+            
+            if (System.IO.File.Exists(stackContext_.FilePath))
             {
-                EditorGUIUtility.systemCopyBuffer = _selectedLogItem.StackString;
+                menu.AddItem(new UnityEngine.GUIContent("Open Source File"), false, () => {
+                    LogItem.OpenStackTraceFile(stackContext_.FilePath, stackContext_.LineNumber);
+                });
             }
-        }
-
-        private void OnStackItemMenuCopySelectedHandler()
-        {
-            if (null != _selectedStackContext)
+            else
             {
-                EditorGUIUtility.systemCopyBuffer = _selectedStackContext.originalStackString;
+                menu.AddDisabledItem(new UnityEngine.GUIContent("Open Source File"));
             }
-        }
-
-        private void OnStackItemMenuOpenSourceFileHandler()
-        {
-            if (null != _selectedStackContext)
-            {
-                LogItem.OpenStackTraceFile(_selectedStackContext.FilePath, _selectedStackContext.LineNumber);
-            }
+            
+            menu.AddItem(new UnityEngine.GUIContent("Copy Selected"), false, () => {
+                UnityEditor.EditorGUIUtility.systemCopyBuffer = stackContext_.OriginalStackString;
+            });
+            
+            menu.AddItem(new UnityEngine.GUIContent("Copy All"), false, () => {
+                if (_selectedLogItem != null)
+                {
+                    UnityEditor.EditorGUIUtility.systemCopyBuffer = _selectedLogItem.StackString;
+                }
+            });
+            
+            menu.ShowAsContext();
         }
     }
 }

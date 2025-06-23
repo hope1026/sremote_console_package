@@ -1,105 +1,126 @@
-﻿// 
+// 
 // Copyright 2015 https://github.com/hope1026
 
 using SPlugin;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 internal class ExtendLogEditorWindow : EditorWindow
 {
     private LogItem _selectedLogItemData = null;
-    private Vector2 _scrollPos;
     private string _searchString = string.Empty;
-    private bool _isFocusedSearchTextField = false;
+    
+    // UI Elements
+    private VisualElement _rootElement;
+    private TextField _searchField;
+    private TextField _logContent;
+    private ScrollView _logScroll;
 
-    void OnGUI()
+    private void CreateGUI()
     {
-        OnGuiSearchBar();
-        _scrollPos = GUILayout.BeginScrollView(_scrollPos);
+        titleContent = new GUIContent("Extended Log");
+        CreateUIElements();
+        BindEvents();
+        RefreshLogContent();
+    }
+
+    private void CreateUIElements()
+    {
+        // Load UXML template
+        var visualTree = Resources.Load<VisualTreeAsset>("UI/ExtendLogEditorWindow");
+        if (visualTree == null)
+        {
+            Debug.LogError("ExtendLogEditorWindow.uxml not found in Resources/UI/");
+            return;
+        }
+
+        _rootElement = visualTree.Instantiate();
+        rootVisualElement.Add(_rootElement);
+
+        // Load USS styles
+        var baseStyles = Resources.Load<StyleSheet>("UI/BaseStyles");
+        var windowStyles = Resources.Load<StyleSheet>("UI/ExtendLogEditorWindowStyles");
         
-        if (null != _selectedLogItemData)
+        if (baseStyles != null)
         {
-            string tempString = _selectedLogItemData.LogData;
-
-            if (false == string.IsNullOrEmpty(_searchString))
-            {
-                tempString = tempString.Replace(_searchString, $"<size=15><b>{_searchString}</b></size>");
-            }
-
-            switch (_selectedLogItemData.LogType)
-            {
-                case LogType.Log:
-                {
-                    tempString = SGuiUtility.ReplaceColorString(tempString, ConsoleEditorPrefs.LogTextColor);
-                    break;
-                }
-                case LogType.Warning:
-                {
-                    tempString = SGuiUtility.ReplaceColorString(tempString, ConsoleEditorPrefs.WarningTextColor);
-                    break;
-                }
-
-                case LogType.Error:
-                {
-                    tempString = SGuiUtility.ReplaceColorString(tempString, ConsoleEditorPrefs.ErrorTextColor);
-                    break;
-                }
-            }
-
-            SGuiStyle.StackTextStyle.alignment = TextAnchor.UpperLeft;
-            SGuiStyle.StackTextStyle.wordWrap = true;
-
-            EditorGUILayout.SelectableLabel($"{tempString}\n{_selectedLogItemData.StackString}", 
-                                            SGuiStyle.StackTextStyle, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+            _rootElement.styleSheets.Add(baseStyles);
+        }
+        if (windowStyles != null)
+        {
+            _rootElement.styleSheets.Add(windowStyles);
         }
 
-        GUILayout.EndScrollView();
+        // Get UI element references
+        _searchField = _rootElement.Q<TextField>("search-field");
+        _logContent = _rootElement.Q<TextField>("log-content");
+        _logScroll = _rootElement.Q<ScrollView>("log-scroll");
+        
+        // Setup initial state
+        if (_searchField != null)
+        {
+            _searchField.value = _searchString;
+        }
     }
 
-    private void OnGuiSearchBar()
+    private void BindEvents()
     {
-        EditorGUILayout.BeginHorizontal();
-        string context = "Search";
-        context = SGuiUtility.ReplaceBoldString(context);
-        GUILayout.Label(context, SGuiStyle.BoxStyle, GUILayout.Width(ConsoleViewLayoutDefines.LogViewExcludeFilterAndSearchMenuWidget.SEARCH_LABEL_WIDTH));
-
-        bool isEmptyString = (true == string.IsNullOrEmpty(_searchString) ? true : false);
-        if (Event.current.type == EventType.Repaint)
-        {
-            _isFocusedSearchTextField = ConsoleViewNameDefines.GuiControllerUniqueName.ExtendLogEditor.TEXT_FIELD_SEARCH.Equals(GUI.GetNameOfFocusedControl());
-        }
-
-        context = _searchString;
-        if (true == isEmptyString)
-        {
-            context = "All";
-            context = SGuiUtility.ReplaceColorString(context, "808080ff");
-        }
-
-        if (true == isEmptyString && true == _isFocusedSearchTextField)
-        {
-            context = string.Empty;
-        }
-
-        if (true == _isFocusedSearchTextField)
-        {
-            SGuiUtility.OnGuiCheckTextFieldCopyAndPaste(ref context);
-        }
-
-        GUI.SetNextControlName(ConsoleViewNameDefines.GuiControllerUniqueName.ExtendLogEditor.TEXT_FIELD_SEARCH);
-        string oldString = context;
-        context = GUILayout.TextField(context, SGuiStyle.TextAreaStyle, GUILayout.ExpandWidth(true));
-
-        if (false == oldString.Equals(context))
-        {
-            _searchString = context;
-        }
-
-        EditorGUILayout.EndHorizontal();
+        _searchField?.RegisterValueChangedCallback(OnSearchChanged);
     }
 
-    public void SetLogItem(LogItem logLogItem_)
+    private void OnSearchChanged(ChangeEvent<string> evt_)
     {
-        _selectedLogItemData = logLogItem_;
+        _searchString = evt_.newValue ?? "";
+        RefreshLogContent();
+    }
+
+    private void RefreshLogContent()
+    {
+        if (_logContent == null || _selectedLogItemData == null) return;
+
+        // Combine log data and stack trace
+        string fullLogText = $"{_selectedLogItemData.LogData}\n{_selectedLogItemData.StackString}";
+        
+        // Apply search highlighting if search string is provided
+        if (!string.IsNullOrEmpty(_searchString))
+        {
+            fullLogText = fullLogText.Replace(_searchString, $"<b><size=15>{_searchString}</size></b>");
+        }
+
+        _logContent.value = fullLogText;
+
+        // Apply color based on log type
+        _logContent.RemoveFromClassList("log-type-log");
+        _logContent.RemoveFromClassList("log-type-warning");
+        _logContent.RemoveFromClassList("log-type-error");
+
+        switch (_selectedLogItemData.LogType)
+        {
+            case LogType.Log:
+                _logContent.AddToClassList("log-type-log");
+                _logContent.style.color = new StyleColor(ConsoleEditorPrefs.LogTextColor);
+                break;
+            case LogType.Warning:
+                _logContent.AddToClassList("log-type-warning");
+                _logContent.style.color = new StyleColor(ConsoleEditorPrefs.WarningTextColor);
+                break;
+            case LogType.Error:
+            case LogType.Exception:
+                _logContent.AddToClassList("log-type-error");
+                _logContent.style.color = new StyleColor(ConsoleEditorPrefs.ErrorTextColor);
+                break;
+        }
+    }
+
+    public void SetLogItem(LogItem logItem_)
+    {
+        _selectedLogItemData = logItem_;
+        RefreshLogContent();
+    }
+
+    private void OnDestroy()
+    {
+        // Cleanup event handlers
+        _searchField?.UnregisterValueChangedCallback(OnSearchChanged);
     }
 }

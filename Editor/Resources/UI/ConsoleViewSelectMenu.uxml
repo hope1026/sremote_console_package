@@ -1,0 +1,13 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="menu-container" class="console-menu-container">
+        <ui:Button name="log-view-button" text="LogView" class="menu-tab-button" />
+        <ui:Button name="command-view-button" text="CommandView" class="menu-tab-button" />
+        <ui:Button name="applications-view-button" text="ApplicationsView" class="menu-tab-button" />
+        <ui:Button name="preferences-view-button" class="menu-tab-button menu-icon-button">
+            <ui:VisualElement name="preferences-icon" class="menu-button-icon" />
+        </ui:Button>
+        <ui:VisualElement name="app-info-container" class="app-info-container">
+            <ui:Label name="app-info-label" text="No connection" class="app-info-label" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

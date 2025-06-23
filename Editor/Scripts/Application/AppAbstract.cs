@@ -67,7 +67,7 @@ namespace SPlugin
                         CommandPacket commandPacket = new CommandPacket();
                         commandPacket.commandType = command.CommandType;
                         commandPacket.commandCategory = command.Category;
-                        commandPacket.commandName = command.Name;
+                        commandPacket.commandName = command.CommandName;
                         commandPacket.commandValue = command.ValueString;
                         SendPacket(commandPacket);
                         command.OnSendCompleted();

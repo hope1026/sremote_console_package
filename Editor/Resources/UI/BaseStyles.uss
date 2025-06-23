@@ -1,0 +1,260 @@
+/* SRemoteConsole Base Styles */
+/* Consolidated common styles shared across all views */
+
+/* =========================== */
+/* CORE CONSOLE ELEMENTS      */
+/* =========================== */
+
+.console-label {
+    color: rgb(192, 192, 192);
+    font-size: 12px;
+    -unity-text-align: middle-left;
+    padding: 2px;
+}
+
+.console-box {
+    background-color: rgb(64, 64, 64);
+    border-color: rgb(128, 128, 128);
+    border-width: 1px;
+    color: rgb(192, 192, 192);
+    padding: 4px;
+}
+
+.console-button {
+    background-color: rgb(96, 96, 96);
+    border-color: rgb(128, 128, 128);
+    border-width: 1px;
+    color: rgb(192, 192, 192);
+    padding: 4px 8px;
+    border-radius: 2px;
+    min-height: 20px;
+}
+
+.console-button:hover {
+    background-color: rgb(112, 112, 112);
+}
+
+.console-button:active {
+    background-color: rgb(80, 80, 80);
+}
+
+.console-toggle {
+    color: rgb(192, 192, 192);
+    margin: 2px 4px;
+}
+
+.console-text-field {
+    background-color: rgb(48, 48, 48);
+    border-color: rgb(128, 128, 128);
+    border-width: 1px;
+    color: rgb(192, 192, 192);
+    padding: 2px 4px;
+    border-radius: 2px;
+}
+
+.console-text-field:focus {
+    border-color: rgb(96, 150, 255);
+}
+
+.console-foldout {
+    color: rgb(192, 192, 192);
+    font-size: 12px;
+    margin: 2px;
+}
+
+.console-foldout > .unity-foldout__toggle {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.console-foldout > .unity-foldout__toggle > .unity-toggle__checkmark {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.console-color-field {
+    margin: 2px;
+}
+
+/* =========================== */
+/* BUTTON-STYLE TOGGLES       */
+/* =========================== */
+
+.button-style-toggle {
+    margin: 0 2px;
+    height: 24px;
+    background-color: rgb(80, 80, 80);
+    border-color: rgb(128, 128, 128);
+    border-width: 1px;
+    border-radius: 2px;
+    padding: 2px 6px;
+    align-items: center;
+    justify-content: center;
+    color: rgb(192, 192, 192);
+}
+
+.button-style-toggle:hover {
+    background-color: rgb(112, 112, 112);
+}
+
+.button-style-toggle:checked {
+    background-color: rgb(62, 91, 144);
+    border-color: rgb(160, 160, 160);
+    color: rgb(255, 255, 255);
+}
+
+/* Hide toggle checkmark completely */
+.button-style-toggle > .unity-toggle__checkmark {
+    display: none;
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.button-style-toggle > .unity-toggle__input {
+    display: none;
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/* =========================== */
+/* ICON STYLES                 */
+/* =========================== */
+
+.button-icon {
+    width: 16px;
+    height: 16px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.log-icon {
+    background-image: resource('Textures/log');
+}
+
+.warning-icon {
+    background-image: resource('Textures/warning');
+}
+
+.error-icon {
+    background-image: resource('Textures/error');
+}
+
+.pause-icon {
+    background-image: resource('Textures/pause');
+}
+
+.pause-play-icon {
+    background-image: resource('Textures/pause_play');
+}
+
+.step-icon {
+    background-image: resource('Textures/step');
+}
+
+.step-play-icon {
+    background-image: resource('Textures/step_play');
+}
+
+/* =========================== */
+/* SECTION STYLES              */
+/* =========================== */
+
+.preferences-section {
+    margin: 8px;
+    padding: 12px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.preferences-section-title {
+    font-size: 14px;
+    color: rgb(220, 220, 220);
+    margin-bottom: 8px;
+    -unity-font-style: bold;
+}
+
+.preferences-row {
+    flex-direction: row;
+    align-items: center;
+    margin: 4px;
+    min-height: 20px;
+}
+
+.preferences-label {
+    min-width: 200px;
+    color: rgb(192, 192, 192);
+    font-size: 12px;
+}
+
+.preferences-control {
+    flex-grow: 1;
+    margin-left: 8px;
+}
+
+.section-title {
+    color: rgb(220, 220, 220);
+    font-size: 14px;
+    -unity-font-style: bold;
+    margin-bottom: 8px;
+}
+
+/* =========================== */
+/* SEPARATOR STYLES            */
+/* =========================== */
+
+.separator-line {
+    height: 2px;
+    background-color: rgb(64, 64, 64);
+    margin: 8px;
+}
+
+/* =========================== */
+/* UTILITY CLASSES             */
+/* =========================== */
+
+.bold-text {
+    -unity-font-style: bold;
+}
+
+.center-text {
+    -unity-text-align: middle-center;
+}
+
+.flex-row {
+    flex-direction: row;
+}
+
+.flex-column {
+    flex-direction: column;
+}
+
+.space-small {
+    margin: 4px;
+}
+
+.space-medium {
+    margin: 8px;
+}
+
+.space-large {
+    margin: 16px;
+}
+
+.hidden {
+    display: none;
+}
+
+/* =========================== */
+/* PLACEHOLDER TEXT            */
+/* =========================== */
+
+.placeholder-text {
+    color: rgb(128, 128, 128);
+}
+
+.placeholder-text > .unity-text-field__input {
+    color: rgb(128, 128, 128);
+}

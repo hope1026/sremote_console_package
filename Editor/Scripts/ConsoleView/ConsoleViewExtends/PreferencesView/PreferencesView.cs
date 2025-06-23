@@ -1,241 +1,259 @@
-﻿// 
+// 
 // Copyright 2015 https://github.com/hope1026
 
 using System;
-using System.IO;
-using SPlugin;
-using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
+using UnityEditor.UIElements;
 
-internal class PreferencesView : ConsoleViewAbstract
+namespace SPlugin
 {
-    public override ConsoleViewType ConsoleViewType => ConsoleViewType.PREFERENCES;
-
-    private bool _toggleFile = false;
-    private bool _toggleColor = false;
-    private bool _requestedSendingPreferencesPacket = false;
-
-    protected override void OnShow()
+    internal class PreferencesView : ConsoleViewAbstract
     {
-        _requestedSendingPreferencesPacket = false;
-    }
+        public override ConsoleViewType ConsoleViewType => ConsoleViewType.PREFERENCES;
 
-    protected override void OnHide()
-    {
-        if (_requestedSendingPreferencesPacket == true)
+        private VisualElement _rootElement;
+        private bool _requestedSendingPreferencesPacket = false;
+
+        // UI Elements
+        private Toggle _showTimeToggle;
+        private Toggle _showFrameCountToggle;
+        private Toggle _showObjectNameToggle;
+        private Toggle _showUnityDebugLogToggle;
+        private FloatField _profilerRefreshTimeField;
+        private IntegerField _skipStackFrameField;
+        private ColorField _backgroundColorField;
+        private ColorField _textColorField;
+        private ColorField _logBackground1ColorField;
+        private ColorField _logBackground2ColorField;
+        private ColorField _logSelectedBackgroundColorField;
+        private Button _resetColorsButton;
+
+        protected override void OnInitialize()
         {
-            AppManager.Instance.GetActivatedApp().SendPreferences();
-            _requestedSendingPreferencesPacket = false;
-        }
-    }
-
-    public override void OnGuiCustom()
-    {
-        GUILayout.BeginVertical();
-
-        GUILayout.Space(5f);
-
-        GUILayoutOption height = GUILayout.Height(2f);
-        GUILayoutOption width = GUILayout.ExpandWidth(true);
-
-        OnGuiShowOption();
-        SGuiUtility.OnGuiLine(width, height);
-
-        OnGuiPreferences();
-        SGuiUtility.OnGuiLine(width, height);
-
-        // OnGuiLogFile();
-        // SGuiUtility.OnGuiLine();
-
-        OnGuiColors();
-
-        GUILayout.EndVertical();
-    }
-
-    private void OnGuiShowOption()
-    {
-        string tempContent = "Show Time";
-        tempContent = SGuiUtility.ReplaceBoldString(tempContent);
-        bool tempToggle = ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_TIME);
-        tempToggle = GUILayout.Toggle(tempToggle, tempContent, SGuiStyle.ToggleStyle);
-        if (true == GUI.changed)
-        {
-            ConsoleEditorPrefsFlags consoleEditorPrefsFlags = (true == tempToggle ? ConsoleEditorPrefsFlags.SHOW_TIME : ConsoleEditorPrefsFlags.NONE);
-            ConsoleEditorPrefs.SetFlags(consoleEditorPrefsFlags, masks_: ConsoleEditorPrefsFlags.SHOW_TIME);
+            CreateUIElements();
+            BindUIEvents();
+            LoadPreferences();
         }
 
-        tempContent = "Show FrameCount";
-        tempContent = SGuiUtility.ReplaceBoldString(tempContent);
-        tempToggle = ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_FRAME_COUNT);
-        tempToggle = GUILayout.Toggle(tempToggle, tempContent, SGuiStyle.ToggleStyle);
-        if (true == GUI.changed)
+        private void CreateUIElements()
         {
-            ConsoleEditorPrefsFlags consoleEditorPrefsFlags = (true == tempToggle ? ConsoleEditorPrefsFlags.SHOW_FRAME_COUNT : ConsoleEditorPrefsFlags.NONE);
-            ConsoleEditorPrefs.SetFlags(consoleEditorPrefsFlags, masks_: ConsoleEditorPrefsFlags.SHOW_FRAME_COUNT);
+            // Load UXML template
+            var visualTree = Resources.Load<VisualTreeAsset>("UI/PreferencesView");
+            if (visualTree == null)
+            {
+                Debug.LogError("PreferencesView.uxml not found in Resources/UI/. Make sure the file exists in the correct path.");
+                // Create a fallback root element
+                _rootElement = new VisualElement();
+                _rootElement.Add(new Label("PreferencesView UXML file not found"));
+                return;
+            }
+
+            _rootElement = visualTree.Instantiate();
+
+            // Load USS styles
+            var baseStyles = Resources.Load<StyleSheet>("UI/BaseStyles");
+            if (baseStyles != null)
+            {
+                _rootElement.styleSheets.Add(baseStyles);
+            }
+            else
+            {
+                Debug.LogWarning("BaseStyles.uss not found in Resources/UI/. Styles may not be applied correctly.");
+            }
+
+            // Get references to UI elements
+            _showTimeToggle = _rootElement.Q<Toggle>("show-time-toggle");
+            _showFrameCountToggle = _rootElement.Q<Toggle>("show-frame-count-toggle");
+            _showObjectNameToggle = _rootElement.Q<Toggle>("show-object-name-toggle");
+            _showUnityDebugLogToggle = _rootElement.Q<Toggle>("show-unity-debug-log-toggle");
+            _profilerRefreshTimeField = _rootElement.Q<FloatField>("profiler-refresh-time-field");
+            _skipStackFrameField = _rootElement.Q<IntegerField>("skip-stack-frame-field");
+            _backgroundColorField = _rootElement.Q<ColorField>("background-color-field");
+            _textColorField = _rootElement.Q<ColorField>("text-color-field");
+            _logBackground1ColorField = _rootElement.Q<ColorField>("log-background1-color-field");
+            _logBackground2ColorField = _rootElement.Q<ColorField>("log-background2-color-field");
+            _logSelectedBackgroundColorField = _rootElement.Q<ColorField>("log-selected-background-color-field");
+            _resetColorsButton = _rootElement.Q<Button>("reset-colors-button");
         }
 
-        tempContent = "Show ObjectName";
-        tempContent = SGuiUtility.ReplaceBoldString(tempContent);
-        tempToggle = ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_OBJECT_NAME);
-        tempToggle = GUILayout.Toggle(tempToggle, tempContent, SGuiStyle.ToggleStyle);
-        if (true == GUI.changed)
+        private void BindUIEvents()
         {
-            ConsoleEditorPrefsFlags consoleEditorPrefsFlags = (true == tempToggle ? ConsoleEditorPrefsFlags.SHOW_OBJECT_NAME : ConsoleEditorPrefsFlags.NONE);
-            ConsoleEditorPrefs.SetFlags(consoleEditorPrefsFlags, masks_: ConsoleEditorPrefsFlags.SHOW_OBJECT_NAME);
+            // Show options toggles
+            _showTimeToggle?.RegisterValueChangedCallback(evt_ =>
+            {
+                ConsoleEditorPrefsFlags flags = evt_.newValue ? ConsoleEditorPrefsFlags.SHOW_TIME : ConsoleEditorPrefsFlags.NONE;
+                ConsoleEditorPrefs.SetFlags(flags, ConsoleEditorPrefsFlags.SHOW_TIME);
+            });
+
+            _showFrameCountToggle?.RegisterValueChangedCallback(evt_ =>
+            {
+                ConsoleEditorPrefsFlags flags = evt_.newValue ? ConsoleEditorPrefsFlags.SHOW_FRAME_COUNT : ConsoleEditorPrefsFlags.NONE;
+                ConsoleEditorPrefs.SetFlags(flags, ConsoleEditorPrefsFlags.SHOW_FRAME_COUNT);
+            });
+
+            _showObjectNameToggle?.RegisterValueChangedCallback(evt_ =>
+            {
+                ConsoleEditorPrefsFlags flags = evt_.newValue ? ConsoleEditorPrefsFlags.SHOW_OBJECT_NAME : ConsoleEditorPrefsFlags.NONE;
+                ConsoleEditorPrefs.SetFlags(flags, ConsoleEditorPrefsFlags.SHOW_OBJECT_NAME);
+            });
+
+            _showUnityDebugLogToggle?.RegisterValueChangedCallback(evt_ =>
+            {
+                ConsoleEditorPrefsFlags flags = evt_.newValue ? ConsoleEditorPrefsFlags.SHOW_UNITY_DEBUG_LOG : ConsoleEditorPrefsFlags.NONE;
+                ConsoleEditorPrefs.SetFlags(flags, ConsoleEditorPrefsFlags.SHOW_UNITY_DEBUG_LOG);
+                _requestedSendingPreferencesPacket = true;
+            });
+
+            // Preferences fields
+            _profilerRefreshTimeField?.RegisterValueChangedCallback(evt_ =>
+            {
+                if (Math.Abs(evt_.newValue - ConsoleEditorPrefs.ProfileRefreshIntervalTimeS) > float.Epsilon)
+                {
+                    ConsoleEditorPrefs.SetProfileRefreshTimeS(evt_.newValue);
+                    _requestedSendingPreferencesPacket = true;
+                }
+            });
+
+            _skipStackFrameField?.RegisterValueChangedCallback(evt_ =>
+            {
+                int skipStackFrameCount = Mathf.Max(evt_.newValue, 0);
+                if (skipStackFrameCount != ConsoleEditorPrefs.SkipStackFrameCount)
+                {
+                    ConsoleEditorPrefs.SetSkipStackFrameCount((uint)skipStackFrameCount);
+                    _requestedSendingPreferencesPacket = true;
+                }
+                // Update field value to ensure it's not negative
+                if (evt_.newValue != skipStackFrameCount)
+                {
+                    _skipStackFrameField.SetValueWithoutNotify(skipStackFrameCount);
+                }
+            });
+
+            // Color fields - Convert between Color and Color32
+            _backgroundColorField?.RegisterValueChangedCallback(evt_ =>
+            {
+                ConsoleEditorPrefs.BackgroundColor = (Color32)evt_.newValue;
+            });
+
+            _textColorField?.RegisterValueChangedCallback(evt_ =>
+            {
+                ConsoleEditorPrefs.TextColor = (Color32)evt_.newValue;
+            });
+
+            _logBackground1ColorField?.RegisterValueChangedCallback(evt_ =>
+            {
+                ConsoleEditorPrefs.LogViewBackground1Color = (Color32)evt_.newValue;
+                // Trigger log list refresh to apply new background color
+                RequestLogListRefresh();
+            });
+
+            _logBackground2ColorField?.RegisterValueChangedCallback(evt_ =>
+            {
+                ConsoleEditorPrefs.LogViewBackground2Color = (Color32)evt_.newValue;
+                // Trigger log list refresh to apply new background color
+                RequestLogListRefresh();
+            });
+
+            _logSelectedBackgroundColorField?.RegisterValueChangedCallback(evt_ =>
+            {
+                ConsoleEditorPrefs.LogViewSelectedBackgroundColor = (Color32)evt_.newValue;
+                // Trigger log list refresh to apply new background color
+                RequestLogListRefresh();
+            });
+
+            // Reset colors button
+            _resetColorsButton?.RegisterCallback<ClickEvent>(_ =>
+            {
+                ConsoleEditorPrefs.ResetDefaultColors();
+                ConsoleEditorPrefs.WriteColorPrefs();
+                LoadPreferences(); // Refresh UI with new values
+                RequestLogListRefresh(); // Refresh log list to apply new background colors
+            });
         }
 
-        tempContent = "Show UnityDebugLog";
-        tempContent = SGuiUtility.ReplaceBoldString(tempContent);
-        tempToggle = ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_UNITY_DEBUG_LOG);
-        tempToggle = GUILayout.Toggle(tempToggle, tempContent, SGuiStyle.ToggleStyle);
-        if (true == GUI.changed)
+        private void LoadPreferences()
         {
-            ConsoleEditorPrefsFlags consoleEditorPrefsFlags = (true == tempToggle ? ConsoleEditorPrefsFlags.SHOW_UNITY_DEBUG_LOG : ConsoleEditorPrefsFlags.NONE);
-            ConsoleEditorPrefs.SetFlags(consoleEditorPrefsFlags, masks_: ConsoleEditorPrefsFlags.SHOW_UNITY_DEBUG_LOG);
-            _requestedSendingPreferencesPacket = true;
-        }
-    }
-
-    private void OnGuiPreferences()
-    {
-        GUILayoutOption layoutWidth = GUILayout.Width(300f);
-
-        float refreshIntervalTimeS = ConsoleEditorPrefs.ProfileRefreshIntervalTimeS;
-        string tempContent = "ProfilerRefreshTime(Seconds)";
-        EditorGUILayout.BeginHorizontal();
-        tempContent = SGuiUtility.ReplaceBoldString(tempContent);
-        EditorGUILayout.LabelField(tempContent, SGuiStyle.BoxStyle, layoutWidth);
-        refreshIntervalTimeS = EditorGUILayout.FloatField(refreshIntervalTimeS, SGuiStyle.NumberFieldStyle);
-        EditorGUILayout.EndHorizontal();
-        if (Math.Abs(refreshIntervalTimeS - ConsoleEditorPrefs.ProfileRefreshIntervalTimeS) > float.Epsilon)
-        {
-            ConsoleEditorPrefs.SetProfileRefreshTimeS(refreshIntervalTimeS);
-            _requestedSendingPreferencesPacket = true;
-        }
-
-        int skipStackFrameCount = (int)ConsoleEditorPrefs.SkipStackFrameCount;
-
-        EditorGUILayout.BeginHorizontal();
-        tempContent = "SkipStackFrameCount";
-        tempContent = SGuiUtility.ReplaceBoldString(tempContent);
-        EditorGUILayout.LabelField(tempContent, SGuiStyle.BoxStyle, layoutWidth);
-        skipStackFrameCount = EditorGUILayout.IntField(skipStackFrameCount, SGuiStyle.NumberFieldStyle);
-        EditorGUILayout.EndHorizontal();
-        skipStackFrameCount = Mathf.Max(skipStackFrameCount, 0);
-        if (skipStackFrameCount != ConsoleEditorPrefs.SkipStackFrameCount)
-        {
-            ConsoleEditorPrefs.SetSkipStackFrameCount((UInt32)skipStackFrameCount);
-            _requestedSendingPreferencesPacket = true;
-        }
-    }
-
-    private void OnGuiLogFile()
-    {
-        string tempContent = "File";
-        tempContent = SGuiUtility.ReplaceBoldString(tempContent);
-        _toggleFile = EditorGUILayout.Foldout(_toggleFile, tempContent, SGuiStyle.FoldOutStyle);
-        if (true == _toggleFile)
-        {
-            //파일 타입
-            GUILayoutOption layoutWidth = GUILayout.Width(ConsoleViewLayoutDefines.windowSize.x * 0.5f);
-            tempContent = "LogFileType";
-            tempContent = SGuiUtility.ReplaceBoldString(tempContent);
-
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(tempContent, SGuiStyle.BoxStyle, layoutWidth);
-            LogFileManager.FileType oldFileType = ConsoleEditorPrefs.LogFileType;
-            ConsoleEditorPrefs.LogFileType = (LogFileManager.FileType)EditorGUILayout.EnumPopup(ConsoleEditorPrefs.LogFileType);
-            EditorGUILayout.EndHorizontal();
+            // Load show options
+            if (_showTimeToggle != null)
+                _showTimeToggle.value = ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_TIME);
             
-            if (oldFileType != ConsoleEditorPrefs.LogFileType)
-            {
-                ConsoleEditorPrefs.SetLogFileType(ConsoleEditorPrefs.LogFileType);
-                LogFileManager.CloseFile();
-                LogFileManager.GenerateFilePath();
-            }
+            if (_showFrameCountToggle != null)
+                _showFrameCountToggle.value = ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_FRAME_COUNT);
+            
+            if (_showObjectNameToggle != null)
+                _showObjectNameToggle.value = ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_OBJECT_NAME);
+            
+            if (_showUnityDebugLogToggle != null)
+                _showUnityDebugLogToggle.value = ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_UNITY_DEBUG_LOG);
 
-            //디렉토리 관련
-            EditorGUILayout.BeginHorizontal();
-            tempContent = "SaveDirectory";
-            tempContent = SGuiUtility.ReplaceBoldString(tempContent);
-            EditorGUILayout.LabelField(tempContent, SGuiStyle.BoxStyle, layoutWidth);
-            tempContent = ConsoleEditorPrefs.LogDirectoryAbsolutePath;
-            EditorGUILayout.LabelField(tempContent, SGuiStyle.BoxStyle);
-            EditorGUILayout.EndHorizontal();
+            // Load preferences
+            if (_profilerRefreshTimeField != null)
+                _profilerRefreshTimeField.value = ConsoleEditorPrefs.ProfileRefreshIntervalTimeS;
+            
+            if (_skipStackFrameField != null)
+                _skipStackFrameField.value = (int)ConsoleEditorPrefs.SkipStackFrameCount;
 
-            EditorGUILayout.BeginHorizontal();
-            if (true == GUILayout.Button("OpenDirectory", layoutWidth))
-            {
-                EditorUtility.OpenWithDefaultApp(ConsoleEditorPrefs.LogDirectoryAbsolutePath);
-            }
-
-            if (true == GUILayout.Button("ChangeDirectory", layoutWidth))
-            {
-                string directory = EditorUtility.OpenFolderPanel("SelectLogDirectory", ConsoleEditorPrefs.LogDirectoryAbsolutePath, string.Empty);
-                if (false == string.IsNullOrEmpty(directory))
-                {
-                    ConsoleEditorPrefs.LogDirectoryAbsolutePath = directory;
-                    ConsoleEditorPrefs.SetLogDirectoryPathA(ConsoleEditorPrefs.LogDirectoryAbsolutePath);
-                }
-            }
-
-            EditorGUILayout.EndHorizontal();
-
-            //파일 관련
-            EditorGUILayout.BeginHorizontal();
-            tempContent = "SaveFile";
-            tempContent = SGuiUtility.ReplaceBoldString(tempContent);
-            EditorGUILayout.LabelField(tempContent, SGuiStyle.BoxStyle, layoutWidth);
-            tempContent = LogFileManager.FilePathAbsolute;
-            EditorGUILayout.LabelField(tempContent, SGuiStyle.BoxStyle);
-            EditorGUILayout.EndHorizontal();
-
-            if (true == File.Exists(LogFileManager.FilePathAbsolute))
-            {
-                EditorGUILayout.BeginHorizontal();
-                if (true == GUILayout.Button("OpenFile", layoutWidth))
-                {
-                    EditorUtility.OpenWithDefaultApp(LogFileManager.FilePathAbsolute);
-                }
-
-                if (true == GUILayout.Button("Save as...", layoutWidth))
-                {
-                    string saveAsFilePathAbsolute = string.Empty;
-                    string fileName = LogFileManager.FileName + "_Copy";
-                    saveAsFilePathAbsolute = EditorUtility.SaveFilePanel("Save SendLog File as..", ConsoleEditorPrefs.LogDirectoryAbsolutePath, fileName,
-                                                                         LogFileManager.FileTypeToExtension(ConsoleEditorPrefs.LogFileType));
-
-                    LogFileManager.SaveAs(saveAsFilePathAbsolute);
-                }
-
-                EditorGUILayout.EndHorizontal();
-            }
-        }
-    }
-
-    private void OnGuiColors()
-    {
-        string tempContent = SGuiUtility.ReplaceBoldString("Color");
-        _toggleColor = EditorGUILayout.Foldout(_toggleColor, tempContent, SGuiStyle.FoldOutStyle);
-        if (false == _toggleColor)
-            return;
-
-        ConsoleEditorPrefs.BackgroundColor = EditorGUILayout.ColorField("Background", ConsoleEditorPrefs.BackgroundColor);
-        ConsoleEditorPrefs.TextColor = EditorGUILayout.ColorField("TextColor", ConsoleEditorPrefs.TextColor);
-        if (true == GUI.changed)
-        {
-            SGuiStyle.RequestUpdateColors = true;
+            // Load colors - Convert Color32 to Color
+            if (_backgroundColorField != null)
+                _backgroundColorField.value = (Color)ConsoleEditorPrefs.BackgroundColor;
+            
+            if (_textColorField != null)
+                _textColorField.value = (Color)ConsoleEditorPrefs.TextColor;
+            
+            if (_logBackground1ColorField != null)
+                _logBackground1ColorField.value = (Color)ConsoleEditorPrefs.LogViewBackground1Color;
+            
+            if (_logBackground2ColorField != null)
+                _logBackground2ColorField.value = (Color)ConsoleEditorPrefs.LogViewBackground2Color;
+            
+            if (_logSelectedBackgroundColorField != null)
+                _logSelectedBackgroundColorField.value = (Color)ConsoleEditorPrefs.LogViewSelectedBackgroundColor;
         }
 
-        ConsoleEditorPrefs.LogViewBackground1Color = EditorGUILayout.ColorField("LogListViewBackground1", ConsoleEditorPrefs.LogViewBackground1Color);
-        ConsoleEditorPrefs.LogViewBackground2Color = EditorGUILayout.ColorField("LogListViewBackground2", ConsoleEditorPrefs.LogViewBackground2Color);
-        ConsoleEditorPrefs.LogViewSelectedBackgroundColor = EditorGUILayout.ColorField("LogListViewSelectedBackground", ConsoleEditorPrefs.LogViewSelectedBackgroundColor);
-
-        if (true == GUILayout.Button("ResetDefaultColors"))
+        public override void OnGuiCustom()
         {
-            ConsoleEditorPrefs.ResetDefaultColors();
-            SGuiStyle.UpdateColor();
-            ConsoleEditorPrefs.WriteColorPrefs();
+            // UIToolkit doesn't use OnGUI - all rendering is handled by the VisualElement system
+            // This method is kept for compatibility but does nothing in UIToolkit implementation
+        }
+
+        public VisualElement GetRootElement()
+        {
+            return _rootElement;
+        }
+
+        protected override void OnShow()
+        {
+            _requestedSendingPreferencesPacket = false;
+            LoadPreferences(); // Refresh UI when shown
+        }
+
+        protected override void OnHide()
+        {
+            if (_requestedSendingPreferencesPacket)
+            {
+                AppManager.Instance.GetActivatedApp()?.SendPreferences();
+                _requestedSendingPreferencesPacket = false;
+            }
+        }
+
+        public override void UpdateCustom()
+        {
+            // UIToolkit handles most updates automatically through data binding
+            // This can be used for custom update logic if needed
+        }
+
+        private void RequestLogListRefresh()
+        {
+            // Request refresh on LogView through ConsoleViewMain
+            ConsoleViewMainRef?.RequestLogViewRefresh();
+        }
+
+        protected override void OnTerminate()
+        {
+            // Clean up if needed
+            _rootElement?.Clear();
+            _rootElement = null;
         }
     }
 }

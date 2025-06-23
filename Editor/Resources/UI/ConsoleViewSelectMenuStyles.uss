@@ -1,0 +1,88 @@
+/* ConsoleViewSelectMenu Specific Styles */
+
+.console-menu-container {
+    flex-direction: row;
+    background-color: rgb(64, 64, 64);
+    padding: 4px 4px;
+    min-height: 20px;
+}
+
+.view-buttons-container {
+    flex-direction: row;
+    align-items: center;
+}
+
+.menu-tab-button {
+    height: 20px;
+    margin: 0 2px;
+    padding: 4px 12px;
+    background-color: rgb(80, 80, 80);
+    border-color: rgb(112, 112, 112);
+    border-width: 1px;
+    border-radius: 4px;
+    color: rgb(192, 192, 192);
+    font-size: 12px;
+    min-width: 80px;
+    -unity-font-style: normal;
+}
+
+.menu-tab-button:hover {
+    background-color: rgb(112, 112, 112);
+}
+
+.menu-tab-button.selected {
+    background-color: rgb(128, 128, 128);
+    color: rgb(255, 255, 255);
+    -unity-font-style: bold;
+}
+
+.menu-icon-button {
+    min-width: 32px;
+    width: 32px;
+    padding: 2px;
+    align-items: center;
+}
+
+.menu-button-icon {
+    width: 18px;
+    height: 18px;
+    background-image: resource('Textures/option');
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.app-info-container {
+    flex-grow: 1;
+    justify-content: center;
+    align-items: flex-start;
+    padding-right: 8px;
+    height: 20px;
+    background-color: rgb(50, 50, 50);
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0);
+    border-radius: 2px;
+    width: auto;
+    flex-shrink: 0;
+    margin: 0 4px;
+}
+
+.app-info-label {
+    color: rgb(192, 192, 192);
+    font-size: 11px;
+    -unity-text-align: middle-right;
+    flex-shrink: 0;
+    flex-grow: 1;
+    flex-direction: row;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+.app-info-label.connected {
+    color: rgb(120, 255, 120);
+    -unity-font-style: bold;
+}
+
+.app-info-label.disconnected {
+    color: rgb(128, 128, 128);
+}

@@ -1,7 +1,7 @@
 ﻿// 
 // Copyright 2015 https://github.com/hope1026
 
-using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace SPlugin
 {
@@ -15,13 +15,11 @@ namespace SPlugin
         private readonly string _toolTip;
         private readonly int _displayPriority = int.MaxValue;
         protected bool isDirty = false;
-        protected readonly GUIContent guiContent = new GUIContent();
-        protected readonly string guiControlName;
 
         public abstract CommandType CommandType { get; }
         public abstract string ValueString { get; }
         public string Category => _category;
-        public string Name => _name;
+        public string CommandName => _name;
         public string ToolTip => _toolTip;
         public int DisplayPriority => _displayPriority;
         public bool IsDirty => isDirty;
@@ -32,12 +30,12 @@ namespace SPlugin
             _displayPriority = displayPriority_;
             _category = category_;
             _toolTip = tooltip_;
-            guiContent.text = _name;
-            guiContent.tooltip = _toolTip;
-            guiControlName = category_ + name_;
         }
 
-        public abstract void OnGui(float commandNameWidth_);
+        // UIToolkit support
+        public abstract VisualElement CreateUIToolkitControl();
+        public abstract void BindUIToolkitEvents(VisualElement control_);
+        public abstract void UpdateUIToolkitValue(VisualElement control_);
 
         public void OnSendCompleted()
         {

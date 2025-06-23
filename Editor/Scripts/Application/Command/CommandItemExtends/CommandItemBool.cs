@@ -1,8 +1,7 @@
 ﻿// 
 // Copyright 2015 https://github.com/hope1026
 
-using UnityEditor;
-using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace SPlugin
 {
@@ -12,24 +11,48 @@ namespace SPlugin
         public override string ValueString => _value.ToString();
         private bool _value = false;
 
+        public bool Value => _value;
+
         internal CommandItemBool(string category_, string name_, bool value_, int displayPriority_ = DEFAULT_DISPLAY_PRIORITY, string tooltip_ = "")
             : base(category_, name_, displayPriority_, tooltip_)
         {
             _value = value_;
         }
 
-        public override void OnGui(float commandNameWidth_)
+        public void ChangeValue(bool newValue_)
         {
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField(guiContent, GUILayout.Width(commandNameWidth_));
-            GUI.SetNextControlName(base.guiControlName);
-            bool newValue = EditorGUILayout.Toggle(_value, GUILayout.ExpandWidth(expand: true));
-            if (newValue != _value)
+            if (newValue_ != _value)
             {
-                _value = newValue;
+                _value = newValue_;
                 isDirty = true;
             }
-            EditorGUILayout.EndHorizontal();
+        }
+
+        public override VisualElement CreateUIToolkitControl()
+        {
+            var toggle = new Toggle();
+            toggle.value = _value;
+            if (!string.IsNullOrEmpty(ToolTip))
+            {
+                toggle.tooltip = ToolTip;
+            }
+            return toggle;
+        }
+
+        public override void BindUIToolkitEvents(VisualElement control_)
+        {
+            if (control_ is Toggle toggle)
+            {
+                toggle.RegisterValueChangedCallback(evt_ => ChangeValue(evt_.newValue));
+            }
+        }
+
+        public override void UpdateUIToolkitValue(VisualElement control_)
+        {
+            if (control_ is Toggle toggle)
+            {
+                toggle.SetValueWithoutNotify(_value);
+            }
         }
     }
 }

@@ -165,8 +165,6 @@ namespace SPlugin
             colorString = ConsoleEditorPrefs._Color32ToString(ConsoleEditorPrefs.ErrorTextColor);
             colorString = EditorPrefs.GetString(ConsoleEditorPrefsIds.ERROR_TEXT_COLOR, colorString);
             ConsoleEditorPrefs.ErrorTextColor = ConsoleEditorPrefs._StringToColor32(colorString);
-
-            SGuiStyle.RequestUpdateColors = true;
         }
 
         public static void SetFlags(ConsoleEditorPrefsFlags consoleEditorPrefsFlags_, ConsoleEditorPrefsFlags masks_)
@@ -284,10 +282,13 @@ namespace SPlugin
         {
             if (true == UnityEditor.EditorGUIUtility.isProSkin)
             {
-                ConsoleEditorPrefs.BackgroundColor = Color.black;
+                Color32 backgroundColor = new Color32(56, 56, 56, 255); // Dark theme background color
+                
+                ConsoleEditorPrefs.BackgroundColor = backgroundColor;
                 ConsoleEditorPrefs.TextColor = new Color32(255, 255, 255, 128);
-                ConsoleEditorPrefs.LogViewBackground1Color = Color.black;
-                ConsoleEditorPrefs.LogViewBackground2Color = Color.grey;
+                // One row same as background, other row slightly darker
+                ConsoleEditorPrefs.LogViewBackground1Color = backgroundColor; // Same as background
+                ConsoleEditorPrefs.LogViewBackground2Color = new Color32(48, 48, 48, 255); // Slightly darker
                 ConsoleEditorPrefs.LogViewSelectedBackgroundColor = new Color32(62, 91, 144, 255);
                 ConsoleEditorPrefs.LogTextColor = Color.white;
                 ConsoleEditorPrefs.WarningTextColor = Color.yellow;
@@ -295,17 +296,18 @@ namespace SPlugin
             }
             else
             {
-                ConsoleEditorPrefs.BackgroundColor = new Color32(194, 194, 194, 255);
+                Color32 backgroundColor = new Color32(194, 194, 194, 255); // Light theme background color
+                
+                ConsoleEditorPrefs.BackgroundColor = backgroundColor;
                 ConsoleEditorPrefs.TextColor = Color.black;
-                ConsoleEditorPrefs.LogViewBackground1Color = new Color32(230, 230, 230, 230);
-                ConsoleEditorPrefs.LogViewBackground2Color = new Color32(216, 216, 216, 255);
+                // One row same as background, other row slightly darker
+                ConsoleEditorPrefs.LogViewBackground1Color = backgroundColor; // Same as background
+                ConsoleEditorPrefs.LogViewBackground2Color = new Color32(180, 180, 180, 255); // Slightly darker
                 ConsoleEditorPrefs.LogViewSelectedBackgroundColor = new Color32(62, 91, 144, 255);
                 ConsoleEditorPrefs.LogTextColor = Color.black;
                 ConsoleEditorPrefs.WarningTextColor = Color.yellow;
                 ConsoleEditorPrefs.ErrorTextColor = Color.red;
             }
-
-            SGuiStyle.RequestUpdateColors = true;
         }
 
         private static Color32 _StringToColor32(string colorString_)

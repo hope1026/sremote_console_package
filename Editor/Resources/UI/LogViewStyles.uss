@@ -1,0 +1,535 @@
+/* LogView Specific Styles */
+
+.log-view-container {
+    flex-grow: 1;
+    flex-direction: column;
+    height: 100%;
+    min-height: 400px;
+}
+
+.log-toolbar {
+    flex-direction: row;
+    background-color: rgb(64, 64, 64);
+    padding: 4px;
+    align-items: center;
+    min-height: 20px;
+    flex-wrap: nowrap;
+    opacity: 1;
+    height: 20px;
+    justify-content: flex-start;
+    align-self: auto;
+}
+
+.control-buttons {
+    flex-direction: row;
+    margin-right: 4px;
+    height: auto;
+    align-self: center;
+}
+
+/* Clear 버튼 크기 조절 */
+.clear-button {
+    min-width: 60px;
+    width: 60px;
+    height: 20px;
+    background-color: rgba(188, 188, 188, 0);
+}
+
+.toolbar-button {
+    width: 28px;
+    height: 20px;
+    margin: 0 2px;
+    background-color: rgb(80, 80, 80);
+    border-color: rgb(112, 112, 112);
+}
+
+.toolbar-button:hover {
+    background-color: rgb(96, 96, 96);
+}
+
+.log-type-filters {
+    flex-direction: row;
+    align-self: center;
+}
+
+/* 로그 필터 버튼 추가 스타일 */
+.log-filter-button {
+    min-width: 40px;
+    padding: 2px 4px;
+    margin: 2px;
+    height: 20px;
+}
+
+.filter-button-content {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+}
+
+.filter-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.filter-count-label {
+    font-size: 12px;
+    -unity-font-style: bold;
+    min-width: 16px;
+    -unity-text-align: middle-center;
+    color: rgb(255, 255, 255);
+}
+
+.pause-controls {
+    flex-direction: row;
+    margin-left: 4px;
+}
+
+/* Search Filter Section (below toolbar) */
+.search-filter-section {
+    background-color: rgb(64, 64, 64);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(96, 96, 96);
+    padding: 4px;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+/* Search and Exclude in same row */
+.search-exclude-row {
+    flex-direction: row;
+    margin-bottom: 4px;
+}
+
+.search-bar, .exclude-bar {
+    flex-direction: row;
+    align-items: center;
+    flex: 1;
+    margin-right: 8px;
+}
+
+.exclude-bar {
+    margin-right: 0;
+}
+
+.search-label, .exclude-label {
+    color: rgb(220, 220, 220);
+    font-size: 12px;
+    -unity-font-style: normal;
+    background-color: rgb(64, 64, 64);
+    border-width: 0;
+    border-radius: 2px;
+    padding: 2px 8px;
+    -unity-text-align: middle-center;
+}
+
+.search-field, .exclude-field {
+    flex-grow: 1;
+    height: 20px;
+    background-color: rgb(48, 48, 48);
+    border-color: rgb(128, 128, 128);
+    border-width: 1px;
+    color: rgb(192, 192, 192);
+    border-radius: 2px;
+    padding: 2px 4px;
+}
+
+/* Quick Search Section */
+.quick-search-section {
+    flex-direction: row;
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin-top: 4px;
+    min-height: 20px;
+}
+
+.quick-search-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.quick-search-button {
+    background-color: rgb(96, 96, 96);
+    border-color: rgb(128, 128, 128);
+    border-width: 1px;
+    border-radius: 2px;
+    color: rgb(192, 192, 192);
+    padding: 4px 8px;
+    font-size: 12px;
+    -unity-font-style: bold;
+    margin-right: 4px;
+    margin-bottom: 2px;
+    height: 20px;
+    width: 120px;
+}
+
+.quick-search-button:hover {
+    background-color: rgb(112, 112, 112);
+}
+
+.quick-search-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex-grow: 1;
+    flex: 1;
+    align-items: flex-start;
+    align-content: flex-start;
+    min-width: 0;
+}
+
+.quick-search-toggle {
+    /* Layout-specific properties only - inherit button-style-toggle appearance */
+    margin: 0 2px 2px 0;
+    font-size: 11px;
+    -unity-text-align: middle-center;
+    height: 20px;
+    flex-grow: 1;
+    flex: 1;
+    min-width: 30px;
+}
+
+.quick-search-help {
+    color: rgb(128, 128, 128);
+    font-size: 11px;
+    padding: 2px 8px;
+    height: 20px;
+    -unity-text-align: middle-left;
+}
+
+.log-list-header {
+    flex-direction: row;
+    background-color: rgb(64, 64, 64);
+    min-height: 24px;
+    flex-shrink: 0;
+}
+
+.log-header-cell {
+    color: rgb(220, 220, 220);
+    font-size: 12px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    align-self: center;
+}
+
+.time-header { 
+    min-width: 80px; 
+    width: 80px;
+    margin-right: 4px;
+    flex-shrink: 0;
+    flex-grow: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.frame-header { 
+    min-width: 60px; 
+    width: 60px;
+    flex-shrink: 0;
+    flex-grow: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.object-header { 
+    min-width: 100px; 
+    width: 100px;
+    flex-shrink: 0;
+    flex-grow: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.message-header { 
+    flex-grow: 1;
+}
+
+.stack-trace-scroll {
+    flex-grow: 1;
+    min-height: 80px;
+    background-color: rgb(48, 48, 48);
+    border-width: 1px;
+    border-color: rgb(96, 96, 96);
+}
+
+.stack-trace-content {
+    color: rgb(192, 192, 192);
+    font-size: 11px;
+    white-space: normal;
+    -unity-text-align: upper-left;
+    padding: 4px;
+}
+
+/* Stack trace line styles */
+.stack-trace-line {
+    color: rgb(192, 192, 192);
+    font-size: 11px;
+    white-space: normal;
+    -unity-text-align: upper-left;
+    padding: 2px 4px;
+    margin: 1px 0;
+}
+
+.stack-trace-clickable {
+    cursor: link;
+    color: rgb(100, 150, 255);
+}
+
+.stack-trace-clickable:hover {
+    background-color: rgba(100, 150, 255, 0.2);
+    border-radius: 2px;
+    color: rgb(120, 170, 255);
+}
+
+/* Log Item Styles - Unity Editor colors */
+.log-item {
+    min-height: 30px;
+    font-size: 12px;
+    flex-direction: row;
+    align-items: flex-start;
+    flex-shrink: 0;
+    height: auto;
+    padding: 3px 4px; /* left/right padding moved from C# */
+}
+
+.log-item:hover {
+    background-color: rgba(100, 150, 255, 0.2) !important;
+}
+
+.log-item:focus {
+    background-color: rgba(62, 125, 231, 0.5) !important;
+}
+
+/* Column separator lines for resizing */
+.log-header-separator {
+    width: 3px;
+    background-color: rgb(30, 30, 30);
+    cursor: resize-horizontal;
+    min-width: 2px;
+    flex-shrink: 0;
+    align-self: stretch;
+}
+
+.log-header-separator:hover {
+    background-color: rgb(128, 128, 128);
+    width: 4px;
+}
+
+.log-header-separator:active {
+    background-color: rgb(160, 160, 160);
+    width: 4px;
+}
+
+/* Log item separator lines (visual only - no interaction) */
+.log-item-separator {
+    width: 3px;
+    background-color: rgb(30, 30, 30);
+    cursor: resize-horizontal;
+    min-width: 2px;
+    flex-shrink: 0;
+    align-self: stretch;
+}
+
+.log-item-separator:hover {
+    background-color: rgb(128, 128, 128);
+    width: 4px;
+}
+
+.log-item-separator:active {
+    background-color: rgb(160, 160, 160);
+    width: 4px;
+}
+
+/* Message label styles for proper text wrapping */
+.log-item #message-label {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    flex-grow: 1;
+    flex-shrink: 1;
+    width: auto;
+    height: auto;
+    -unity-text-align: middle-left;
+    align-self: center;
+    padding: 2px 0;
+    margin-left: 2px;
+}
+
+/* Column label styles for fixed width columns */
+.log-item #time-label,
+.log-item #frame-label,
+.log-item #object-label {
+    align-self: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    -unity-text-align: middle-center;
+    padding: 2px 0;
+    display: none; /* Default hidden, shown via C# when needed */
+}
+
+.log-item #time-label {
+    min-width: 80px;
+}
+
+.log-item #frame-label {
+    min-width: 60px;
+}
+
+.log-item #object-label {
+    min-width: 100px;
+}
+
+/* Collapse label styles */
+.log-item #collapse-label {
+    width: 30px;
+    -unity-text-align: middle-center;
+    -unity-font-style: bold;
+    display: none;
+    flex-shrink: 0;
+    align-self: center;
+    padding: 2px 0;
+}
+
+/* Log item separator styles */
+.log-item #time-separator,
+.log-item #frame-separator,
+.log-item #object-separator {
+    display: none; /* Default hidden, shown via C# when needed */
+}
+
+/* Toggle specific styles */
+#collapse-toggle,
+#clear-on-play-toggle {
+    height: 20px;
+    -unity-text-align: middle-left;
+}
+
+/* Filter button specific styles */
+#show-log-toggle {
+    margin: 2px;
+    height: 20px;
+}
+
+#show-error-toggle {
+    margin: 2px;
+    height: 20px;
+}
+
+/* Pause controls specific styles */
+.pause-controls {
+    flex-direction: row;
+    justify-content: center;
+    align-self: center;
+}
+
+#error-pause-toggle {
+    margin: 2px 2px 2px 0;
+    height: 20px;
+}
+
+#pause-button {
+    margin: 2px;
+    height: 20px;
+}
+
+#step-button {
+    padding: 0;
+    margin: 2px;
+    height: 20px;
+    flex-direction: row;
+}
+
+.search-label {
+    background-color: rgba(0, 0, 0, 0);
+    -unity-text-align: middle-center;
+}
+
+/* Hidden header elements */
+.time-header.hidden,
+.frame-header.hidden,
+.object-header.hidden,
+.log-header-separator.hidden {
+    display: none;
+}
+
+/* TwoPaneSplitView Resizer Styles */
+.main-splitter {
+    flex-grow: 1;
+    flex-shrink: 0;
+    min-height: 300px;
+    height: 100%;
+}
+
+.main-splitter > .unity-two-pane-split-view__content-container {
+    flex-grow: 1;
+}
+
+.main-splitter > .unity-two-pane-split-view__dragline-anchor {
+    background-color: rgb(96, 96, 96);
+    height: 4px;
+    cursor: resize-vertical;
+}
+
+.main-splitter > .unity-two-pane-split-view__dragline-anchor:hover {
+    background-color: rgb(128, 128, 128);
+}
+
+.main-splitter > .unity-two-pane-split-view__dragline-anchor:active {
+    background-color: rgb(62, 91, 144);
+}
+
+/* Log list and stack trace panel styles */
+.log-list-panel {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 150px;
+    background-color: rgb(56, 56, 56);
+}
+
+.log-list {
+    flex-grow: 1;
+    flex-shrink: 1;
+    background-color: rgb(56, 56, 56);
+}
+
+.stack-trace-panel {
+    flex-grow: 0;
+    flex-shrink: 0;
+    height: 120px;
+    min-height: 120px;
+    max-height: 300px;
+    background-color: rgb(48, 48, 48);
+    border-top-width: 1px;
+    border-top-color: rgb(96, 96, 96);
+}
+
+.stack-trace-scroll {
+    flex-grow: 1;
+    background-color: rgb(48, 48, 48);
+}
+
+.stack-trace-content {
+    color: rgb(192, 192, 192);
+    font-size: 11px;
+    padding: 8px;
+}
+
+.stack-trace-line {
+    color: rgb(192, 192, 192);
+    font-size: 11px;
+    padding: 2px 4px;
+}
+
+.stack-trace-clickable {
+    cursor: link;
+}
+
+.stack-trace-clickable:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+}

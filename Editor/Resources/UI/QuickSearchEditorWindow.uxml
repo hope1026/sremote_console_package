@@ -1,0 +1,24 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <!-- Quick Search Editor Window -->
+    <ui:VisualElement name="quick-search-root" class="quick-search-root">
+        
+        <!-- Header Section -->
+        <ui:VisualElement class="quick-search-header">
+            <ui:Label text="Quick Search String" class="quick-search-title" />
+        </ui:VisualElement>
+        
+        <!-- Input Section -->
+        <ui:VisualElement class="quick-search-input-section">
+            <ui:TextField name="search-input" placeholder-text="Enter search string..." class="quick-search-input" />
+            <ui:Button name="add-button" text="Add String" class="quick-search-add-btn" />
+        </ui:VisualElement>
+        
+        <!-- Search List Section -->
+        <ui:ScrollView name="search-list-scroll" class="quick-search-list-container">
+            <ui:VisualElement name="search-list" class="quick-search-list">
+                <!-- Search items will be added dynamically here -->
+            </ui:VisualElement>
+        </ui:ScrollView>
+        
+    </ui:VisualElement>
+</ui:UXML>

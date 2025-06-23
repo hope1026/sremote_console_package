@@ -1,0 +1,113 @@
+/* ExtendLogEditorWindow Styles */
+
+.extend-log-window-root {
+    flex-grow: 1;
+    flex-direction: column;
+    height: 100%;
+    min-height: 300px;
+    background-color: rgb(56, 56, 56);
+}
+
+/* Search Section */
+.search-section {
+    flex-direction: row;
+    background-color: rgb(64, 64, 64);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(96, 96, 96);
+    padding: 4px;
+    flex-shrink: 0;
+    align-items: center;
+    min-height: 20px;
+}
+
+.search-label {
+    color: rgb(220, 220, 220);
+    font-size: 12px;
+    -unity-font-style: bold;
+    background-color: rgb(64, 64, 64);
+    border-width: 0;
+    border-radius: 2px;
+    padding: 2px 8px;
+    -unity-text-align: middle-center;
+    margin-right: 8px;
+    min-width: 60px;
+}
+
+.search-field {
+    flex-grow: 1;
+    height: 20px;
+    background-color: rgb(48, 48, 48);
+    border-color: rgb(128, 128, 128);
+    border-width: 1px;
+    color: rgb(192, 192, 192);
+    border-radius: 2px;
+    padding: 2px 4px;
+}
+
+.search-field:focus {
+    border-color: rgb(96, 150, 255);
+}
+
+/* Log Content */
+.log-scroll {
+    flex-grow: 1;
+    height: 100%;
+    background-color: rgb(48, 48, 48);
+    border-width: 1px;
+    border-color: rgb(96, 96, 96);
+    padding: 8px;
+}
+
+.log-content {
+    color: rgb(192, 192, 192);
+    font-size: 12px;
+    white-space: normal;
+    -unity-text-align: upper-left;
+    padding: 8px;
+    margin: 0;
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 0;
+    background-color: rgb(48, 48, 48);
+    border-width: 0;
+    border-radius: 0;
+}
+
+.log-content:focus {
+    border-color: rgba(96, 150, 255, 0.5);
+    border-width: 1px;
+}
+
+.log-content > .unity-text-field__input {
+    border-width: 0;
+    padding: 0;
+    margin: 0;
+    -unity-text-align: upper-left;
+    white-space: normal;
+}
+
+/* Log content styling based on log type */
+.log-content.log-type-log {
+    color: rgb(192, 192, 192);
+}
+
+.log-content.log-type-warning {
+    color: rgb(255, 255, 0);
+}
+
+.log-content.log-type-error {
+    color: rgb(255, 96, 96);
+}
+
+/* Additional utility styles */
+.selectable-text {
+    cursor: text;
+    -unity-text-align: upper-left;
+    white-space: normal;
+}
+
+/* Window sizing */
+.extend-log-window-root {
+    min-width: 400px;
+    min-height: 300px;
+}

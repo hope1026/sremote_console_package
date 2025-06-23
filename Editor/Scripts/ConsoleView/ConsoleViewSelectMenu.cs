@@ -1,143 +1,194 @@
-﻿// 
+// 
 // Copyright 2015 https://github.com/hope1026
 
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace SPlugin
 {
     internal class ConsoleViewSelectMenu
     {
         private ConsoleViewMain _consoleViewMainRef = null;
-        private readonly RectOffset _menuTapMargin = new RectOffset();
         private AppAbstract _currentAppRef = null;
+
+        private VisualElement _rootElement;
+        private Button _logViewButton;
+        private Button _commandViewButton;
+        private Button _applicationsViewButton;
+        private Button _preferencesViewButton;
+        private Label _appInfoLabel;
 
         public void Initialize(ConsoleViewMain consoleViewMain_, AppAbstract currentApp_)
         {
             _consoleViewMainRef = consoleViewMain_;
             _currentAppRef = currentApp_;
+            CreateUIElements();
+            BindEvents();
+            UpdateButtonStates();
+            UpdateAppInfo();
         }
 
-        public void Terminate()
+        private void CreateUIElements()
         {
-            _consoleViewMainRef = null;
+            // Load UXML template
+            var visualTree = Resources.Load<VisualTreeAsset>("UI/ConsoleViewSelectMenu");
+            if (visualTree == null)
+            {
+                Debug.LogError("ConsoleViewSelectMenu.uxml not found in Resources/UI/");
+                return;
+            }
+
+            _rootElement = visualTree.Instantiate();
+
+            // Load USS styles
+            var baseStyles = Resources.Load<StyleSheet>("UI/BaseStyles");
+            var consoleMenuStyles = Resources.Load<StyleSheet>("UI/ConsoleViewSelectMenuStyles");
+            
+            if (baseStyles != null)
+            {
+                _rootElement.styleSheets.Add(baseStyles);
+            }
+            if (consoleMenuStyles != null)
+            {
+                _rootElement.styleSheets.Add(consoleMenuStyles);
+            }
+
+            // Get references to UI elements
+            _logViewButton = _rootElement.Q<Button>("log-view-button");
+            _commandViewButton = _rootElement.Q<Button>("command-view-button");
+            _applicationsViewButton = _rootElement.Q<Button>("applications-view-button");
+            _preferencesViewButton = _rootElement.Q<Button>("preferences-view-button");
+            _appInfoLabel = _rootElement.Q<Label>("app-info-label");
+        }
+
+        private void BindEvents()
+        {
+            // View button events
+            _logViewButton?.RegisterCallback<ClickEvent>(_ =>
+            {
+                if (_consoleViewMainRef.CurrentConsoleViewType != ConsoleViewType.LOG)
+                {
+                    _consoleViewMainRef.ShowView(ConsoleViewType.LOG);
+                    UpdateButtonStates();
+                }
+            });
+
+            _commandViewButton?.RegisterCallback<ClickEvent>(_ =>
+            {
+                if (_consoleViewMainRef.CurrentConsoleViewType != ConsoleViewType.COMMAND)
+                {
+                    _consoleViewMainRef.ShowView(ConsoleViewType.COMMAND);
+                    UpdateButtonStates();
+                }
+            });
+
+            _applicationsViewButton?.RegisterCallback<ClickEvent>(_ =>
+            {
+                if (_consoleViewMainRef.CurrentConsoleViewType != ConsoleViewType.APPLICATIONS)
+                {
+                    _consoleViewMainRef.ShowView(ConsoleViewType.APPLICATIONS);
+                    UpdateButtonStates();
+                }
+            });
+
+            _preferencesViewButton?.RegisterCallback<ClickEvent>(_ =>
+            {
+                if (_consoleViewMainRef.CurrentConsoleViewType != ConsoleViewType.PREFERENCES)
+                {
+                    _consoleViewMainRef.ShowView(ConsoleViewType.PREFERENCES);
+                    UpdateButtonStates();
+                }
+            });
+        }
+
+        private void UpdateButtonStates()
+        {
+            if (_consoleViewMainRef == null) return;
+
+            var currentViewType = _consoleViewMainRef.CurrentConsoleViewType;
+
+            // Remove selected class from all buttons
+            _logViewButton?.RemoveFromClassList("selected");
+            _commandViewButton?.RemoveFromClassList("selected");
+            _applicationsViewButton?.RemoveFromClassList("selected");
+            _preferencesViewButton?.RemoveFromClassList("selected");
+
+            // Add selected class to current button
+            switch (currentViewType)
+            {
+                case ConsoleViewType.LOG:
+                    _logViewButton?.AddToClassList("selected");
+                    break;
+                case ConsoleViewType.COMMAND:
+                    _commandViewButton?.AddToClassList("selected");
+                    break;
+                case ConsoleViewType.APPLICATIONS:
+                    _applicationsViewButton?.AddToClassList("selected");
+                    break;
+                case ConsoleViewType.PREFERENCES:
+                    _preferencesViewButton?.AddToClassList("selected");
+                    break;
+            }
         }
 
         public void OnChangedCurrentApp(AppAbstract currentApp_)
         {
             _currentAppRef = currentApp_;
+            UpdateAppInfo();
         }
 
-        public void OnGuiCustom()
+        private void UpdateAppInfo()
         {
-            OnGuiBackgroundBox();
-
-            GUILayout.BeginHorizontal();
-
-            SGuiStyle.MenuTapNormalStyle.margin = _menuTapMargin;
-            SGuiStyle.MenuTapSelectedStyle.margin = _menuTapMargin;
-
-            OnGuiLogViewToggle();
-            OnGuiCommandViewToggle();
-            OnGuiRemoteViewToggle();
-            OnGuiPreferenceViewToggle();
-            OnGuiRemoteAppInfo();
-
-            GUILayout.EndHorizontal();
-        }
-
-        private void OnGuiBackgroundBox()
-        {
-            GUI.Box(ConsoleViewLayoutDefines.ViewSelectMenu.areaRect, "", SGuiStyle.ButtonStyle);
-        }
-
-        private void OnGuiLogViewToggle()
-        {
-            GUIContent content = new GUIContent();
-            content.text = SGuiUtility.ReplaceBoldString("LogView");
-
-            GUILayoutOption layoutOptionWidth = GUILayout.Width(120f);
-            GUILayoutOption layoutOptionHeight = GUILayout.Height(ConsoleViewLayoutDefines.ViewSelectMenu.areaRect.height);
-            bool latestShowingLog = _consoleViewMainRef.CurrentConsoleViewType == ConsoleViewType.LOG;
-            GUIStyle guiStyle = latestShowingLog ? SGuiStyle.MenuTapSelectedStyle : SGuiStyle.MenuTapNormalStyle;
-            bool showingLog = GUILayout.Toggle(latestShowingLog, content, guiStyle, layoutOptionWidth, layoutOptionHeight);
-            if (latestShowingLog == false && showingLog == true)
+            if (_appInfoLabel == null || _currentAppRef == null)
             {
-                _consoleViewMainRef.ShowView(ConsoleViewType.LOG);
-            }
-        }
-
-        private void OnGuiCommandViewToggle()
-        {
-            GUIContent content = new GUIContent();
-            content.text = SGuiUtility.ReplaceBoldString("CommandView");
-
-            GUILayoutOption layoutOptionWidth = GUILayout.Width(120f);
-            GUILayoutOption layoutOptionHeight = GUILayout.Height(ConsoleViewLayoutDefines.ViewSelectMenu.areaRect.height);
-            bool latestShowingCommand = _consoleViewMainRef.CurrentConsoleViewType == ConsoleViewType.COMMAND;
-            GUIStyle guiStyle = latestShowingCommand ? SGuiStyle.MenuTapSelectedStyle : SGuiStyle.MenuTapNormalStyle;
-            bool showingLog = GUILayout.Toggle(latestShowingCommand, content, guiStyle, layoutOptionWidth, layoutOptionHeight);
-            if (latestShowingCommand == false && showingLog == true)
-            {
-                _consoleViewMainRef.ShowView(ConsoleViewType.COMMAND);
-            }
-        }
-
-        private void OnGuiPreferenceViewToggle()
-        {
-            GUIContent content = new GUIContent(SGuiResources.OptionIconTexture);
-            content.tooltip = "Open the preferences windows.";
-
-            GUILayoutOption layoutOptionWidth = GUILayout.Width(30f);
-            GUILayoutOption layoutOptionHeight = GUILayout.Height(ConsoleViewLayoutDefines.LogViewToolbarWidget.areaRect.height);
-
-            bool latestShowingPreferences = _consoleViewMainRef.CurrentConsoleViewType == ConsoleViewType.PREFERENCES;
-            GUIStyle guiStyle = latestShowingPreferences ? SGuiStyle.MenuTapSelectedStyle : SGuiStyle.MenuTapNormalStyle;
-            bool showingPreferences = GUILayout.Toggle(latestShowingPreferences, content, guiStyle, layoutOptionWidth, layoutOptionHeight);
-            if (latestShowingPreferences == false && showingPreferences == true)
-            {
-                _consoleViewMainRef.ShowView(ConsoleViewType.PREFERENCES);
-            }
-        }
-
-        private void OnGuiRemoteViewToggle()
-        {
-            GUIContent content = new GUIContent();
-            content.text = "ApplicationsView";
-
-            GUILayoutOption layoutOptionWidth = GUILayout.Width(120f);
-            GUILayoutOption layoutOptionHeight = GUILayout.Height(ConsoleViewLayoutDefines.ViewSelectMenu.areaRect.height);
-
-            bool latestShowingRemote = _consoleViewMainRef.CurrentConsoleViewType == ConsoleViewType.APPLICATIONS;
-            GUIStyle guiStyle = latestShowingRemote ? SGuiStyle.MenuTapSelectedStyle : SGuiStyle.MenuTapNormalStyle;
-            bool showingRemote = GUILayout.Toggle(latestShowingRemote, content, guiStyle, layoutOptionWidth, layoutOptionHeight);
-            if (latestShowingRemote == false && showingRemote == true)
-            {
-                _consoleViewMainRef.ShowView(ConsoleViewType.APPLICATIONS);
-            }
-        }
-
-        private void OnGuiRemoteAppInfo()
-        {
-            if (_currentAppRef == null)
+                if (_appInfoLabel != null)
+                {
+                    _appInfoLabel.text = "No connection";
+                    _appInfoLabel.RemoveFromClassList("connected");
+                    _appInfoLabel.AddToClassList("disconnected");
+                }
                 return;
+            }
 
-            GUIContent content = new GUIContent();
-            content.text = $"{_currentAppRef.systemInfoContext.DeviceName}({_currentAppRef.systemInfoContext.RuntimePlatform})-{_currentAppRef.IpAddressString}:{_currentAppRef.AppConnectionStateType.ToString()})";
+            // Build app info text
+            string appInfoText = $"{_currentAppRef.systemInfoContext.DeviceName}({_currentAppRef.systemInfoContext.RuntimePlatform})-{_currentAppRef.IpAddressString}:{_currentAppRef.AppConnectionStateType}";
 
-            GUILayoutOption layoutOptionWidth = GUILayout.ExpandWidth(expand: true);
-            GUILayoutOption layoutOptionHeight = GUILayout.Height(ConsoleViewLayoutDefines.ViewSelectMenu.areaRect.height);
+            // Apply styling based on connection state
             if (_currentAppRef.HasConnected())
             {
-                SGuiStyle.ConnectedAppAreaStyle.fontStyle = FontStyle.Bold;
-                SGuiStyle.ConnectedAppAreaStyle.fontSize = 11;
-                GUILayout.Label(content, SGuiStyle.ConnectedAppAreaStyle, layoutOptionWidth, layoutOptionHeight);
+                _appInfoLabel.text = appInfoText;
+                _appInfoLabel.RemoveFromClassList("disconnected");
+                _appInfoLabel.AddToClassList("connected");
             }
             else
             {
-                SGuiStyle.DisConnectedAppAreaStyle.fontSize = 10;
-                content.text = SGuiUtility.ReplaceColorString(content.text, Color.gray);
-                GUILayout.Label(content, SGuiStyle.DisConnectedAppAreaStyle, layoutOptionWidth, layoutOptionHeight);
+                // Apply gray color for disconnected state
+                string coloredText = ColorUtility.ReplaceColorString(appInfoText, Color.gray);
+                _appInfoLabel.text = coloredText;
+                _appInfoLabel.RemoveFromClassList("connected");
+                _appInfoLabel.AddToClassList("disconnected");
             }
+        }
+
+        public void UpdateCustom()
+        {
+            // Update app info periodically
+            UpdateAppInfo();
+            
+            // Update button states in case view changed programmatically
+            UpdateButtonStates();
+        }
+
+        public VisualElement GetRootElement()
+        {
+            return _rootElement;
+        }
+
+        public void Terminate()
+        {
+            _rootElement?.RemoveFromHierarchy();
+            _rootElement = null;
+            _consoleViewMainRef = null;
         }
     }
 }
