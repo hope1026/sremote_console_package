@@ -1,5 +1,4 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" editor-extension-mode="False">
-    <Style src="project://database/Packages/com.splugin.remoteconsole/Runtime/Resources/UI/CommandViewRuntimeStyles.uss?fileID=7433441132597879392&amp;guid=a05aaa65e9f3f4a92a44ef85cccfb5cc&amp;type=3#CommandViewRuntimeStyles" />
     <ui:VisualElement name="command-view" class="command-view">
         <ui:VisualElement name="no-commands-message-root" class="no-commands-message-root">
             <ui:Label text="You can add commands using SCommand.Register()" name="no-commands-title" class="no-commands-title" />

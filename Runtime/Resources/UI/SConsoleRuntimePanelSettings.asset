@@ -12,15 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 19101, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: SConsoleRuntimePanelSettings
   m_EditorClassIdentifier: 
-  themeUss: {fileID: -4733365628477956816, guid: 50e988c19485e4f4fb9011135debe295,
-    type: 3}
+  themeUss: {fileID: 0}
   m_TargetTexture: {fileID: 0}
   m_ScaleMode: 2
   m_ReferenceSpritePixelsPerUnit: 100
   m_Scale: 0.8
   m_ReferenceDpi: 96
   m_FallbackDpi: 96
-  m_ReferenceResolution: {x: 597, y: 1061}
+  m_ReferenceResolution: {x: 654, y: 409}
   m_ScreenMatchMode: 0
   m_Match: 0.5
   m_SortingOrder: 11
