@@ -76,9 +76,10 @@ namespace SPlugin
         {
             if (null != packet_ && packet_.Write())
             {
+                RemoteConsoleToLocalApplicationBridge.Instance.SendToRuntimeConsoleApp(packet_);
                 if (Application.isEditor)
                 {
-                    RemoteConsoleLocalEditorBridge.Instance.SendToEditor(packet_);
+                    RemoteConsoleToLocalApplicationBridge.Instance.SendToEditorConsoleApp(packet_);
                 }
                 else if (null != _socketServer)
                 {
@@ -91,10 +92,10 @@ namespace SPlugin
         {
             lock (_receivePacketList)
             {
-                if (0 < RemoteConsoleLocalEditorBridge.Instance.PacketsForApplication.Count)
+                if (0 < RemoteConsoleToLocalApplicationBridge.Instance.PacketsForConsoleMain.Count)
                 {
-                    _receivePacketList.InsertRange(0, RemoteConsoleLocalEditorBridge.Instance.PacketsForApplication);
-                    RemoteConsoleLocalEditorBridge.Instance.PacketsForApplication.Clear();
+                    _receivePacketList.InsertRange(0, RemoteConsoleToLocalApplicationBridge.Instance.PacketsForConsoleMain);
+                    RemoteConsoleToLocalApplicationBridge.Instance.PacketsForConsoleMain.Clear();
                 }
 
                 try

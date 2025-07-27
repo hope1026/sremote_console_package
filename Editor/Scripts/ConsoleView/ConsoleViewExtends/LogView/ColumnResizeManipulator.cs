@@ -5,14 +5,14 @@ using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal class ColumnResizeManipulator : Manipulator
     {
         private readonly VisualElement _targetColumn;
         private readonly VisualElement _nextColumn;
         private readonly float _minWidth;
-        private readonly string _columnType; // "time", "frame", "object"
+        private readonly string _columnType;
         private bool _isDragging = false;
         private Vector2 _startPosition;
         private float _startTargetWidth;

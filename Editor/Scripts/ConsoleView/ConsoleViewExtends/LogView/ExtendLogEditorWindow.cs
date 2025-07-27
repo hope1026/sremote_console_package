@@ -1,10 +1,10 @@
 // 
 // Copyright 2015 https://github.com/hope1026
 
-using SPlugin;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
+using SPlugin.RemoteConsole.Editor;
 
 internal class ExtendLogEditorWindow : EditorWindow
 {
@@ -15,7 +15,6 @@ internal class ExtendLogEditorWindow : EditorWindow
     private VisualElement _rootElement;
     private TextField _searchField;
     private TextField _logContent;
-    private ScrollView _logScroll;
 
     private void CreateGUI()
     {
@@ -54,7 +53,6 @@ internal class ExtendLogEditorWindow : EditorWindow
         // Get UI element references
         _searchField = _rootElement.Q<TextField>("search-field");
         _logContent = _rootElement.Q<TextField>("log-content");
-        _logScroll = _rootElement.Q<ScrollView>("log-scroll");
         
         // Setup initial state
         if (_searchField != null)

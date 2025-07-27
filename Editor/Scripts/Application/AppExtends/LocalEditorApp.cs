@@ -3,7 +3,7 @@
 
 using UnityEditor;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal class LocalEditorApp : AppAbstract
     {
@@ -39,10 +39,10 @@ namespace SPlugin
 
         protected override void OnUpdateCustom()
         {
-            if (0 < RemoteConsoleLocalEditorBridge.Instance.PacketsForEditor.Count)
+            if (0 < RemoteConsoleToLocalApplicationBridge.Instance.PacketsForEditorConsoleApp.Count)
             {
-                receivedPacketList.InsertRange(0, RemoteConsoleLocalEditorBridge.Instance.PacketsForEditor);
-                RemoteConsoleLocalEditorBridge.Instance.PacketsForEditor.Clear();
+                receivedPacketList.InsertRange(0, RemoteConsoleToLocalApplicationBridge.Instance.PacketsForEditorConsoleApp);
+                RemoteConsoleToLocalApplicationBridge.Instance.PacketsForEditorConsoleApp.Clear();
             }
             ProcessAllReceivedPackets();
 
@@ -62,7 +62,7 @@ namespace SPlugin
         {
             if (null != packet_ && packet_.Write())
             {
-                RemoteConsoleLocalEditorBridge.Instance.SendToApplication(packet_);
+                RemoteConsoleToLocalApplicationBridge.Instance.SendToConsoleMain(packet_);
                 if (packet_ is PausePlayingPacket pausePlayingPacket && IsActivated)
                 {
                     _isPaused = pausePlayingPacket.IsPause;

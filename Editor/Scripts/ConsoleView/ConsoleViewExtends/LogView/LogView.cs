@@ -4,7 +4,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal class LogView : ConsoleViewAbstract
     {
@@ -57,7 +57,7 @@ namespace SPlugin
             InitializeSearchFields();
             
             // Subscribe to quick search updates
-            QuickSearchEditorWindow.OnQuickSearchChanged += RequestQuickSearchUpdate;
+            QuickSearchEditorWindow.onQuickSearchChanged += RequestQuickSearchUpdate;
             
             // Force initial refresh after a short delay to ensure everything is set up
             UnityEditor.EditorApplication.delayCall += RequestRefresh;
@@ -65,12 +65,12 @@ namespace SPlugin
 
         private void InitializeWidgets()
         {
-            // Initialize log list widget
+            // OnOpenConsole log list widget
             _logListWidget = new LogListWidget();
             _logListWidget.Initialize(_rootElement, this);
             _logListWidget.OnLogItemSelected += OnLogItemSelected;
             
-            // Initialize stack widget
+            // OnOpenConsole stack widget
             _logStackWidget = new LogStackWidget();
             _logStackWidget.Initialize(_rootElement);
         }
@@ -82,7 +82,7 @@ namespace SPlugin
 
         private void InitializeSearchFields()
         {
-            // Initialize search fields with current preferences and placeholder text
+            // OnOpenConsole search fields with current preferences and placeholder text
             if (_searchField != null)
             {
                 string searchString = ConsoleEditorPrefs.SearchString ?? "";
@@ -95,7 +95,7 @@ namespace SPlugin
                 SetupPlaceholderTextField(_excludeField, excludeString, "You can exclude for a specific string.");
             }
             
-            // Initialize QuickSearch list
+            // OnOpenConsole QuickSearch list
             _quickSearchNeedsUpdate = true; // Force initial update
             UpdateQuickSearchList();
         }
@@ -146,6 +146,8 @@ namespace SPlugin
             }
 
             _rootElement = visualTree.Instantiate();
+            _rootElement.style.width = Length.Percent(100);
+            _rootElement.style.height = Length.Percent(100);
 
             // Load USS styles
             var baseStyles = Resources.Load<StyleSheet>("UI/BaseStyles");
@@ -161,10 +163,10 @@ namespace SPlugin
             }
 
             // Get references to UI elements
-            GetToolbarElements();
+            GetAndInitToolbarElements();
         }
 
-        private void GetToolbarElements()
+        private void GetAndInitToolbarElements()
         {
             _clearButton = _rootElement.Q<Button>("clear-button");
             _pauseButton = _rootElement.Q<Toggle>("pause-button");
@@ -186,6 +188,20 @@ namespace SPlugin
             _logCountLabel = _rootElement.Q<Label>("log-count-label");
             _warningCountLabel = _rootElement.Q<Label>("warning-count-label");
             _errorCountLabel = _rootElement.Q<Label>("error-count-label");
+            
+            // Update toggle states
+            if (_showLogToggle != null)
+                _showLogToggle.SetValueWithoutNotify(ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_LOG));
+            if (_showWarningToggle != null)
+                _showWarningToggle.SetValueWithoutNotify(ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_WARNING));
+            if (_showErrorToggle != null)
+                _showErrorToggle.SetValueWithoutNotify(ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_ERROR));
+            if (_collapseToggle != null)
+                _collapseToggle.SetValueWithoutNotify(ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.IS_COLLAPSE));
+            if (_clearOnPlayToggle != null)
+                _clearOnPlayToggle.SetValueWithoutNotify(ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.IS_CLEAR_ON_PLAY));
+            if (_errorPauseToggle != null)
+                _errorPauseToggle.SetValueWithoutNotify(ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.ERROR_PAUSE));
             
             // Configure the splitter
             ConfigureSplitter();
@@ -491,20 +507,6 @@ namespace SPlugin
         {
             if (CurrentAppRef == null) return;
 
-            // Update toggle states
-            if (_showLogToggle != null)
-                _showLogToggle.SetValueWithoutNotify(ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_LOG));
-            if (_showWarningToggle != null)
-                _showWarningToggle.SetValueWithoutNotify(ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_WARNING));
-            if (_showErrorToggle != null)
-                _showErrorToggle.SetValueWithoutNotify(ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_ERROR));
-            if (_collapseToggle != null)
-                _collapseToggle.SetValueWithoutNotify(ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.IS_COLLAPSE));
-            if (_clearOnPlayToggle != null)
-                _clearOnPlayToggle.SetValueWithoutNotify(ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.IS_CLEAR_ON_PLAY));
-            if (_errorPauseToggle != null)
-                _errorPauseToggle.SetValueWithoutNotify(ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.ERROR_PAUSE));
-
             // Update search fields - only if they're different to avoid infinite loops
             if (_searchField != null)
             {
@@ -635,7 +637,7 @@ namespace SPlugin
         protected override void OnTerminate()
         {
             // Unsubscribe from quick search updates
-            QuickSearchEditorWindow.OnQuickSearchChanged -= RequestQuickSearchUpdate;
+            QuickSearchEditorWindow.onQuickSearchChanged -= RequestQuickSearchUpdate;
             
             // Cleanup widgets
             _logListWidget?.Cleanup();

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal class ConsoleEditorPrefsSearchContext : IComparable<ConsoleEditorPrefsSearchContext>
     {

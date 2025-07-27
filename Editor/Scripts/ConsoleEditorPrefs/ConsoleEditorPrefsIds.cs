@@ -3,7 +3,7 @@
 
 using UnityEditor;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal class ConsoleEditorPrefsIds
     {

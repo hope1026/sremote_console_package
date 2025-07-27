@@ -3,7 +3,7 @@
 
 using System;
 using System.Reflection;
-using SPlugin;
+using SPlugin.RemoteConsole.Editor;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -55,7 +55,7 @@ public class SConsoleEditorWindow : EditorWindow
         {
             ConsoleViewMain.Instance.Terminate();
             ConsoleViewMain.Instance.Initialize(this);
-            RemoteConsoleLocalEditorBridge.Instance.OnStartInEditor();
+            SPlugin.RemoteConsoleToLocalApplicationBridge.Instance.OnStartInEditorApplication();
             _consoleEditorWindow = this;
         }
         catch (Exception exception)

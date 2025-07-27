@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal static class ConsoleEditorPrefs
     {
@@ -66,11 +66,7 @@ namespace SPlugin
             }
 
             ConsoleEditorPrefs.LogFileType = (LogFileManager.FileType)EditorPrefs.GetInt(ConsoleEditorPrefsIds.LOG_FILE_TYPE, (int)LogFileManager.FileType.NONE);
-
-            ConsoleViewLayoutDefines.LogListWidget.Area.timeWidth = EditorPrefs.GetFloat(ConsoleEditorPrefsIds.LOG_VIEW_TIME_WIDTH, ConsoleViewLayoutDefines.LogListWidget.Area.timeWidth);
-            ConsoleViewLayoutDefines.LogListWidget.Area.frameCountWidth = EditorPrefs.GetFloat(ConsoleEditorPrefsIds.LOG_VIEW_FRAME_COUNT_WIDTH, ConsoleViewLayoutDefines.LogListWidget.Area.frameCountWidth);
-            ConsoleViewLayoutDefines.LogListWidget.Area.objectNameWidth = EditorPrefs.GetFloat(ConsoleEditorPrefsIds.LOG_VIEW_OBJECT_NAME_WIDTH, ConsoleViewLayoutDefines.LogListWidget.Area.objectNameWidth);
-
+            
             ConsoleEditorPrefs.ResetDefaultColors();
             ReadColorPrefs();
         }
@@ -83,10 +79,6 @@ namespace SPlugin
 
             EditorPrefs.SetString(ConsoleEditorPrefsIds.LOG_DIRECTORY_PATH_A, ConsoleEditorPrefs.LogDirectoryAbsolutePath);
             EditorPrefs.SetInt(ConsoleEditorPrefsIds.LOG_FILE_TYPE, (int)ConsoleEditorPrefs.LogFileType);
-
-            EditorPrefs.SetFloat(ConsoleEditorPrefsIds.LOG_VIEW_TIME_WIDTH, ConsoleViewLayoutDefines.LogListWidget.Area.timeWidth);
-            EditorPrefs.SetFloat(ConsoleEditorPrefsIds.LOG_VIEW_FRAME_COUNT_WIDTH, ConsoleViewLayoutDefines.LogListWidget.Area.frameCountWidth);
-            EditorPrefs.SetFloat(ConsoleEditorPrefsIds.LOG_VIEW_OBJECT_NAME_WIDTH, ConsoleViewLayoutDefines.LogListWidget.Area.objectNameWidth);
 
             WriteSearchStringListPrefs();
             WriteColorPrefs();

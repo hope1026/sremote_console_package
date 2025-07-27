@@ -7,7 +7,7 @@ using System.IO;
 using System.Xml;
 using UnityEngine;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal static class LogFileManager
     {

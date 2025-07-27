@@ -1,6 +1,11 @@
 # Change Log
 ***
 
+## 3.1.0(Jul 27, 2025)
+### Features
+* **Runtime Console UI**: Added complete in-game console interface using UIToolkit for direct debugging within built applications
+* **Unified UIToolkit Architecture**: Implemented consistent UIToolkit-based UI architecture across both Editor and Runtime Console for seamless development experience
+
 ## 3.0.2(Jun 22, 2025)
 ### Features
 * **Complete UIToolkit Migration**: Migrated entire editor interface from IMGUI to UIToolkit for better performance and modern UI experience

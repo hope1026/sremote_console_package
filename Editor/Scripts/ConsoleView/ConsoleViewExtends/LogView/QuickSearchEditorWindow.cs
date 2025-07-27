@@ -1,8 +1,7 @@
 ﻿// 
 // Copyright 2015 https://github.com/hope1026
 
-using System.Collections.Generic;
-using SPlugin;
+using SPlugin.RemoteConsole.Editor;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -10,13 +9,12 @@ using UnityEngine.UIElements;
 public class QuickSearchEditorWindow : EditorWindow
 {
     // Static event for notifying LogView when quick search list changes
-    public static System.Action OnQuickSearchChanged;
+    public static System.Action onQuickSearchChanged;
     
     private VisualElement _rootElement;
     private TextField _searchInput;
     private Button _addButton;
     private VisualElement _searchList;
-    private List<ConsoleEditorPrefsSearchContext> _searchItems = new List<ConsoleEditorPrefsSearchContext>();
 
     private void CreateGUI()
     {
@@ -61,18 +59,18 @@ public class QuickSearchEditorWindow : EditorWindow
     private void BindEvents()
     {
         // Add button click
-        _addButton?.RegisterCallback<ClickEvent>(evt =>
+        _addButton?.RegisterCallback<ClickEvent>(_ =>
         {
             AddSearchString();
         });
 
         // Enter key in text field
-        _searchInput?.RegisterCallback<KeyDownEvent>(evt =>
+        _searchInput?.RegisterCallback<KeyDownEvent>(evt_ =>
         {
-            if (evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.KeypadEnter)
+            if (evt_.keyCode == KeyCode.Return || evt_.keyCode == KeyCode.KeypadEnter)
             {
                 AddSearchString();
-                evt.StopPropagation();
+                evt_.StopPropagation();
             }
         });
     }
@@ -87,7 +85,7 @@ public class QuickSearchEditorWindow : EditorWindow
             RefreshSearchList();
             
             // Notify LogView that quick search list has changed
-            OnQuickSearchChanged?.Invoke();
+            onQuickSearchChanged?.Invoke();
         }
     }
 
@@ -97,7 +95,6 @@ public class QuickSearchEditorWindow : EditorWindow
 
         // Clear existing items
         _searchList.Clear();
-        _searchItems.Clear();
 
         // Add current search items
         int filterCount = ConsoleEditorPrefs.GetQuickSearchListCount();
@@ -106,27 +103,26 @@ public class QuickSearchEditorWindow : EditorWindow
             ConsoleEditorPrefsSearchContext filterContext = ConsoleEditorPrefs.GetQuickSearchContext(filterIndex);
             if (filterContext != null)
             {
-                _searchItems.Add(filterContext);
                 CreateSearchItem(filterContext);
             }
         }
     }
 
-    private void CreateSearchItem(ConsoleEditorPrefsSearchContext searchContext)
+    private void CreateSearchItem(ConsoleEditorPrefsSearchContext searchContext_)
     {
         var itemContainer = new VisualElement();
         itemContainer.AddToClassList("quick-search-item");
 
-        var label = new Label(searchContext.SearchString);
+        var label = new Label(searchContext_.SearchString);
         label.AddToClassList("quick-search-item-label");
 
         var deleteButton = new Button(() =>
         {
-            ConsoleEditorPrefs.RemoveQuickSearchString(searchContext.SearchString);
+            ConsoleEditorPrefs.RemoveQuickSearchString(searchContext_.SearchString);
             RefreshSearchList();
             
             // Notify LogView that quick search list has changed
-            OnQuickSearchChanged?.Invoke();
+            onQuickSearchChanged?.Invoke();
         });
         deleteButton.text = "Delete";
         deleteButton.AddToClassList("quick-search-delete-btn");

@@ -94,3 +94,39 @@
     width: 80px;
     height: 20px;
 }
+
+.preferences-section {
+    flex-grow: 1;
+    margin: 8px;
+    padding: 12px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.preferences-section-title {
+    font-size: 14px;
+    color: rgb(220, 220, 220);
+    margin-bottom: 8px;
+    -unity-font-style: bold;
+}
+
+.preferences-row {
+    flex-direction: row;
+    align-items: center;
+    margin: 4px;
+    min-height: 20px;
+}
+
+.preferences-label {
+    min-width: 200px;
+    color: rgb(192, 192, 192);
+    font-size: 12px;
+}
+
+.preferences-control {
+    flex-grow: 1;
+    flex-shrink: 1;
+    margin-left: 8px;
+}

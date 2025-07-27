@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal class SystemMessageView
     {

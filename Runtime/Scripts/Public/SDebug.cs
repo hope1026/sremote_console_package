@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using SPlugin.RemoteConsole.Runtime;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -92,6 +93,20 @@ namespace SPlugin
         {
 #if !DISABLE_SREMOTE_CONSOLE
             ConsoleMain.SendLogException(exception_, object_);
+#endif
+        }
+        
+        public static void OpenConsole(int sortingOrder_ = Int32.MaxValue)
+        {
+#if !DISABLE_SREMOTE_CONSOLE
+            SConsoleRuntimeMain.Instance.OpenConsole(sortingOrder_);
+#endif
+        }
+        
+        public static void CloseConsole()
+        {
+#if !DISABLE_SREMOTE_CONSOLE
+            SConsoleRuntimeMain.Instance.CloseConsole();
 #endif
         }
 

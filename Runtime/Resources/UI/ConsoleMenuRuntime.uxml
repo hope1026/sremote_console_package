@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Packages/com.splugin.remoteconsole/Runtime/Resources/UI/ConsoleMenu.uss?fileID=7433441132597879392&amp;guid=d76bb944c6e5e485693db2fde1a2b2c8&amp;type=3#ConsoleMenu" />
+    <ui:VisualElement name="menu-container" class="menu-container">
+        <ui:Button name="log-view-button" text="Log" class="menu-button" />
+        <ui:Button name="command-view-button" text="Command" class="menu-button" />
+        <ui:Button name="preferences-view-button" text="Preferences" class="menu-button" />
+        <ui:Button name="close-button" text="Close" class="menu-button" />
+    </ui:VisualElement>
+</ui:UXML>

@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal class PreferencesView : ConsoleViewAbstract
     {
@@ -51,16 +51,7 @@ namespace SPlugin
 
             _rootElement = visualTree.Instantiate();
 
-            // Load USS styles
-            var baseStyles = Resources.Load<StyleSheet>("UI/BaseStyles");
-            if (baseStyles != null)
-            {
-                _rootElement.styleSheets.Add(baseStyles);
-            }
-            else
-            {
-                Debug.LogWarning("BaseStyles.uss not found in Resources/UI/. Styles may not be applied correctly.");
-            }
+           
 
             // Get references to UI elements
             _showTimeToggle = _rootElement.Q<Toggle>("show-time-toggle");
@@ -75,6 +66,32 @@ namespace SPlugin
             _logBackground2ColorField = _rootElement.Q<ColorField>("log-background2-color-field");
             _logSelectedBackgroundColorField = _rootElement.Q<ColorField>("log-selected-background-color-field");
             _resetColorsButton = _rootElement.Q<Button>("reset-colors-button");
+        }
+
+        private void LoadStyleSheets(VisualElement rootElement_)
+        {
+            if(rootElement_ == null) 
+                return;
+    
+            StyleSheet baseStyles = Resources.Load<StyleSheet>("UI/BaseStyles");
+            if (baseStyles != null)
+            {
+                _rootElement.styleSheets.Add(baseStyles);
+            }
+            else
+            {
+                Debug.LogWarning("BaseStyles.uss not found in Resources/UI/. Styles may not be applied correctly.");
+            }
+            
+            StyleSheet preferencesStyles = Resources.Load<StyleSheet>("UI/PreferencesViewStyles");
+            if (preferencesStyles != null)
+            {
+                _rootElement.styleSheets.Add(preferencesStyles);
+            }
+            else
+            {
+                Debug.LogWarning("PreferencesViewStyle.uss not found in Resources/UI/. Styles may not be applied correctly.");
+            }
         }
 
         private void BindUIEvents()
@@ -209,12 +226,6 @@ namespace SPlugin
             
             if (_logSelectedBackgroundColorField != null)
                 _logSelectedBackgroundColorField.value = (Color)ConsoleEditorPrefs.LogViewSelectedBackgroundColor;
-        }
-
-        public override void OnGuiCustom()
-        {
-            // UIToolkit doesn't use OnGUI - all rendering is handled by the VisualElement system
-            // This method is kept for compatibility but does nothing in UIToolkit implementation
         }
 
         public VisualElement GetRootElement()

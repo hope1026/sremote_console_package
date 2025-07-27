@@ -11,7 +11,7 @@ using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal class LogItem
     {

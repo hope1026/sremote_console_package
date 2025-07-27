@@ -74,9 +74,14 @@
 
 ### 시스템 및 프로파일 정보
 1. SConsole 에디터의 ApplicationView 에서 앱 리스트를 확인합니다
-2. ShowInfo 버튼을 눌러 시스템 및 프로파일 정보를 확인합니다
+2. Info 버튼을 눌러 시스템 및 프로파일 정보를 확인합니다
 
-![systeminfo.png](Images%2Fsysteminfo.png)
+![systeminfo.png](Images%2Fuitoolkit%2Fapplication_view.png)
+- - -
+
+### Runtime Console
+
+![runtime_console.png](Images%2Fuitoolkit%2Fruntime_console.png)
 - - -
 
 ## Getting started

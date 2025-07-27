@@ -65,7 +65,7 @@ namespace SPlugin
             _consoleNetwork.StartHost();
         }
 
-        public void OnStartIfLocalEditor()
+        public void OnStartIfLocalApplication()
         {
             SendSystemInfo();
         }
@@ -438,7 +438,7 @@ namespace SPlugin
                 {
                     component.DelegateOnDestroy = Stop;
                     component.DelegateOnUpdate = UpdateCustom;
-                    RemoteConsoleLocalEditorBridge.Instance.UnRegisterUpdateInEditorDelegate();
+                    RemoteConsoleToLocalApplicationBridge.Instance.UnRegisterUpdateInEditorApplicationDelegate();
                 }
 
                 Object.DontDestroyOnLoad(_consoleGameObject);

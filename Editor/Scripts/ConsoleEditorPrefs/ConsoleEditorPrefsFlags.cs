@@ -3,7 +3,7 @@
 
 using System;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     [Flags]
     internal enum ConsoleEditorPrefsFlags

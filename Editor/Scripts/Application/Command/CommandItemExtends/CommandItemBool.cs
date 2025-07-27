@@ -3,7 +3,7 @@
 
 using UnityEngine.UIElements;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal class CommandItemBool : CommandItemAbstract
     {
