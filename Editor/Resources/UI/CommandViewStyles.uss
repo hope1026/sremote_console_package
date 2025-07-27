@@ -6,7 +6,7 @@
     pointer-events: auto;
 }
 
-.no-commands-message {
+.no-commands-message-root {
     align-items: center;
     justify-content: center;
     flex-grow: 1;
@@ -50,11 +50,6 @@
     overflow: hidden;
 }
 
-.category-tabs {
-    flex-direction: row;
-    flex-wrap: wrap;
-}
-
 .category-tab-button {
     margin: 2px;
     padding: 4px 12px;
@@ -86,7 +81,7 @@
     pointer-events: auto;
 }
 
-.commands-interface {
+.commands-interface-root {
     pointer-events: auto;
 }
 
@@ -151,6 +146,6 @@
 }
 
 /* Element-specific styles */
-.no-commands-message.hidden {
+.no-commands-message-root.hidden {
     display: none;
 }

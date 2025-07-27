@@ -1,81 +1,60 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Packages/com.splugin.remoteconsole/Editor/Resources/UI/PreferencesViewStyles.uss?fileID=7433441132597879392&amp;guid=823b7afb9ffd64bbb8f5c33c4b749171&amp;type=3#PreferencesViewStyles" />
     <ui:ScrollView class="preferences-container">
-        
-        <!-- Show Options Section -->
         <ui:VisualElement class="preferences-section">
             <ui:Label text="Show Options" class="preferences-section-title bold-text" />
-            
             <ui:VisualElement class="preferences-row">
                 <ui:Toggle name="show-time-toggle" label="Show Time" class="console-toggle" />
             </ui:VisualElement>
-            
             <ui:VisualElement class="preferences-row">
                 <ui:Toggle name="show-frame-count-toggle" label="Show FrameCount" class="console-toggle" />
             </ui:VisualElement>
-            
             <ui:VisualElement class="preferences-row">
                 <ui:Toggle name="show-object-name-toggle" label="Show ObjectName" class="console-toggle" />
             </ui:VisualElement>
-            
             <ui:VisualElement class="preferences-row">
                 <ui:Toggle name="show-unity-debug-log-toggle" label="Show UnityDebugLog" class="console-toggle" />
             </ui:VisualElement>
         </ui:VisualElement>
-
         <ui:VisualElement class="separator-line" />
-
-        <!-- Preferences Section -->
         <ui:VisualElement class="preferences-section">
             <ui:Label text="Preferences" class="preferences-section-title bold-text" />
-            
             <ui:VisualElement class="preferences-row">
                 <ui:Label text="ProfilerRefreshTime(Seconds)" class="preferences-label bold-text" />
                 <uie:FloatField name="profiler-refresh-time-field" class="preferences-control console-text-field" />
             </ui:VisualElement>
-            
             <ui:VisualElement class="preferences-row">
                 <ui:Label text="SkipStackFrameCount" class="preferences-label bold-text" />
                 <uie:IntegerField name="skip-stack-frame-field" class="preferences-control console-text-field" />
             </ui:VisualElement>
         </ui:VisualElement>
-
         <ui:VisualElement class="separator-line" />
-
-        <!-- Colors Section -->
         <ui:Foldout name="color-foldout" text="Color" class="console-foldout">
             <ui:VisualElement class="preferences-section">
-                
                 <ui:VisualElement class="preferences-row">
                     <ui:Label text="Background" class="preferences-label" />
                     <uie:ColorField name="background-color-field" class="preferences-control console-color-field" />
                 </ui:VisualElement>
-                
                 <ui:VisualElement class="preferences-row">
                     <ui:Label text="TextColor" class="preferences-label" />
                     <uie:ColorField name="text-color-field" class="preferences-control console-color-field" />
                 </ui:VisualElement>
-                
                 <ui:VisualElement class="preferences-row">
                     <ui:Label text="LogListViewBackground1" class="preferences-label" />
                     <uie:ColorField name="log-background1-color-field" class="preferences-control console-color-field" />
                 </ui:VisualElement>
-                
                 <ui:VisualElement class="preferences-row">
                     <ui:Label text="LogListViewBackground2" class="preferences-label" />
                     <uie:ColorField name="log-background2-color-field" class="preferences-control console-color-field" />
                 </ui:VisualElement>
-                
                 <ui:VisualElement class="preferences-row">
                     <ui:Label text="LogListViewSelectedBackground" class="preferences-label" />
                     <uie:ColorField name="log-selected-background-color-field" class="preferences-control console-color-field" />
                 </ui:VisualElement>
-                
                 <ui:VisualElement class="preferences-row">
                     <ui:Button name="reset-colors-button" text="ResetDefaultColors" class="console-button" />
                 </ui:VisualElement>
-                
             </ui:VisualElement>
         </ui:Foldout>
-
     </ui:ScrollView>
 </ui:UXML>

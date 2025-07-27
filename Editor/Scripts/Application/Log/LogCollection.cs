@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal class LogCollection
     {
@@ -13,9 +13,9 @@ namespace SPlugin
         private readonly List<LogItem> _bufferList = new List<LogItem>(MAX_LOG_ITEM);
         private readonly List<LogItem> _filteredBufferList = new List<LogItem>(MAX_LOG_ITEM);
 
-        public  int LogCount { get; private set; }
-        public  int WarningCount { get; private set; }
-        public  int ErrorCount { get; private set; }
+        public int LogCount { get; private set; }
+        public int WarningCount { get; private set; }
+        public int ErrorCount { get; private set; }
 
         public void AddItem(LogItem newLogItem_)
         {
@@ -137,18 +137,18 @@ namespace SPlugin
                 case LogType.Log:
                 {
                     if (false == ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_LOG)) { return false; }
-                }
                     break;
+                }
                 case LogType.Warning:
                 {
                     if (false == ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_WARNING)) { return false; }
-                }
                     break;
+                }
                 case LogType.Error:
                 {
                     if (false == ConsoleEditorPrefs.GetFlagState(ConsoleEditorPrefsFlags.SHOW_ERROR)) { return false; }
-                }
                     break;
+                }
             }
 
             if (false == string.IsNullOrEmpty(ConsoleEditorPrefs.ExcludeFilterString) && true == logLogItem_.LogData.Contains(ConsoleEditorPrefs.ExcludeFilterString))
@@ -212,11 +212,11 @@ namespace SPlugin
         private LogItem FindEqualItemFromFilteredBufferList(LogItem targetLogItem_)
         {
             if (targetLogItem_ == null) return null;
-            
+
             foreach (LogItem item in _filteredBufferList)
             {
                 if (item == null) continue;
-                
+
                 if (targetLogItem_.LineNumber != item.LineNumber)
                     continue;
 

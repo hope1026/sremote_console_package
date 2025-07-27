@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal class AppManager
     {

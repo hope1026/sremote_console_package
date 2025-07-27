@@ -1,7 +1,7 @@
 ﻿// 
 // Copyright 2015 https://github.com/hope1026
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal abstract class ConsoleViewAbstract
     {
@@ -40,9 +40,7 @@ namespace SPlugin
         }
 
         public virtual void UpdateCustom() { }
-
-        public virtual void OnGuiCustom() { }
-
+        
         protected virtual void OnInitialize() { }
         protected virtual void OnShow() { }
         protected virtual void OnHide() { }

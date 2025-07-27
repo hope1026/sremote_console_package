@@ -4,7 +4,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal class ConsoleViewSelectMenu
     {
@@ -34,7 +34,7 @@ namespace SPlugin
             var visualTree = Resources.Load<VisualTreeAsset>("UI/ConsoleViewSelectMenu");
             if (visualTree == null)
             {
-                Debug.LogError("ConsoleViewSelectMenu.uxml not found in Resources/UI/");
+                Debug.LogError("ConsoleMenu.uxml not found in Resources/UI/");
                 return;
             }
 

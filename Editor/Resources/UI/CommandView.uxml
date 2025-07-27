@@ -1,44 +1,23 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
-    <ui:VisualElement class="command-container">
-        
-        <!-- No Commands Message -->
-        <ui:VisualElement name="no-commands-message" class="no-commands-message hidden">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement name="command-view" class="command-view">
+        <ui:VisualElement name="no-commands-message-root" class="no-commands-message-root hidden">
             <ui:Label text="Command feature is valid in play mode." class="no-commands-title" />
             <ui:Label text="You can add commands using the functions below:" class="no-commands-subtitle" />
             <ui:Label text="SCommand.Register(categoryName, commandName, defaultValue, onChangedValueDelegate, displayPriority, tooltip)" class="no-commands-code" />
         </ui:VisualElement>
-        
-        <!-- Commands Interface -->
-        <ui:VisualElement name="commands-interface" class="commands-interface">
-            
-            <!-- Category Tabs -->
+        <ui:VisualElement name="commands-interface-root" class="commands-interface-root">
             <ui:VisualElement name="category-tabs-container" class="category-tabs-container">
-                <ui:VisualElement name="category-tabs-scroll" class="category-tabs-scroll">
-                    <ui:VisualElement name="category-tabs" class="category-tabs">
-                        <!-- Category buttons will be added dynamically -->
-                    </ui:VisualElement>
-                </ui:VisualElement>
+                <ui:VisualElement name="category-tabs-scroll" class="category-tabs-scroll" />
             </ui:VisualElement>
-            
-            <!-- Commands List -->
             <ui:VisualElement name="commands-list-container" class="commands-list-container">
-                
-                <!-- Commands Header -->
                 <ui:VisualElement name="commands-header" class="commands-header">
                     <ui:Label text="Command Name" class="command-header-name" />
                     <ui:Label text="Command Value" class="command-header-value" />
                 </ui:VisualElement>
-                
-                <!-- Commands Content -->
                 <ui:VisualElement name="commands-scroll" class="commands-scroll">
-                    <ui:VisualElement name="commands-list" class="commands-list">
-                        <!-- Command items will be added dynamically -->
-                    </ui:VisualElement>
+                    <ui:VisualElement name="commands-list" class="commands-list" />
                 </ui:VisualElement>
-                
             </ui:VisualElement>
-            
         </ui:VisualElement>
-        
     </ui:VisualElement>
 </ui:UXML>

@@ -1,0 +1,52 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:VisualElement class="log-view-container">
+        <ui:VisualElement name="log-toolbar" class="log-toolbar">
+            <ui:VisualElement name="control-buttons" class="control-buttons">
+                <ui:Button name="clear-button" text="Clear" tooltip="Removes any messages generated from your code." class="toolbar-button console-button clear-button" style="-unity-font: url(&apos;project://database/Library/unity%20default%20resources?fileID=10102&amp;guid=0000000000000000e000000000000000&amp;type=0#LegacyRuntime&apos;);" />
+                <ui:Toggle name="collapse-toggle" tooltip="Shows only the first instance of recurring error messages." class="button-style-toggle" style="-unity-font: url(&apos;project://database/Library/unity%20default%20resources?fileID=10102&amp;guid=0000000000000000e000000000000000&amp;type=0#LegacyRuntime&apos;);">
+                    <ui:Label text="Collapse" class="button-label" />
+                </ui:Toggle>
+            </ui:VisualElement>
+            <ui:VisualElement name="log-type-filters" class="log-type-filters">
+                <ui:Toggle name="show-log-toggle" tooltip="Displays the number of messages in the Console. Click to show/hide messages." class="button-style-toggle log-filter-button">
+                    <ui:VisualElement class="filter-button-content">
+                        <ui:VisualElement name="log-icon" class="filter-icon log-icon" />
+                        <ui:Label name="log-count-label" text="0" class="filter-count-label" />
+                    </ui:VisualElement>
+                </ui:Toggle>
+                <ui:Toggle name="show-warning-toggle" tooltip="Displays the number of warnings in the Console. Click to show/hide warnings." class="button-style-toggle log-filter-button">
+                    <ui:VisualElement class="filter-button-content">
+                        <ui:VisualElement name="warning-icon" class="filter-icon warning-icon" />
+                        <ui:Label name="warning-count-label" text="0" class="filter-count-label" />
+                    </ui:VisualElement>
+                </ui:Toggle>
+                <ui:Toggle name="show-error-toggle" tooltip="Displays the number of errors in the Console. Click to show/hide errors." class="button-style-toggle log-filter-button">
+                    <ui:VisualElement class="filter-button-content">
+                        <ui:VisualElement name="error-icon" class="filter-icon error-icon" />
+                        <ui:Label name="error-count-label" text="0" class="filter-count-label" />
+                    </ui:VisualElement>
+                </ui:Toggle>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="search-filter-section" class="search-filter-section">
+            <ui:VisualElement name="search-exclude-row" class="search-exclude-row">
+                <ui:VisualElement name="search-bar" class="search-bar">
+                    <ui:Label text="Search" tooltip="You can search for a specific string." class="search-label" />
+                    <ui:TextField name="search-field" tooltip="You can search for a specific string." class="search-field" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="log-list-panel" class="log-list-panel">
+            <ui:VisualElement name="log-list-header" class="log-list-header">
+                <ui:Label name="time-header" text="Time(S)" class="log-header-cell time-header hidden" />
+                <ui:VisualElement name="time-separator" class="log-header-separator hidden" />
+                <ui:Label name="frame-header" text="FrameCount" class="log-header-cell frame-header hidden" />
+                <ui:VisualElement name="frame-separator" class="log-header-separator hidden" />
+                <ui:Label name="object-header" text="ObjectName" class="log-header-cell object-header hidden" />
+                <ui:VisualElement name="object-separator" class="log-header-separator hidden" />
+                <ui:Label text="SendLog" class="log-header-cell message-header" />
+            </ui:VisualElement>
+            <ui:ListView name="log-list" virtualization-method="DynamicHeight" class="log-list" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

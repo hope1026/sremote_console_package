@@ -1,0 +1,322 @@
+/* SRemoteConsole Base Styles */
+/* Consolidated common styles shared across all views */
+
+/* =========================== */
+/* CORE CONSOLE ELEMENTS      */
+/* =========================== */
+
+.console-label {
+    color: rgb(192, 192, 192);
+    font-size: 12px;
+    -unity-text-align: middle-left;
+    padding: 2px;
+}
+
+.console-box {
+    background-color: rgba(64, 64, 64, 0.5);
+    border-color: rgb(128, 128, 128);
+    border-width: 1px;
+    color: rgb(192, 192, 192);
+    padding: 4px;
+}
+
+.console-button {
+    background-color: rgba(96, 96, 96, 0.5);
+    border-color: rgb(128, 128, 128);
+    border-width: 1px;
+    color: rgb(192, 192, 192);
+    padding: 4px 8px;
+    border-radius: 2px;
+    min-height: 20px;
+}
+
+.console-button:hover {
+    background-color: rgba(112, 112, 112, 0.5);
+}
+
+.console-button:active {
+    background-color: rgba(80, 80, 80, 0.5);
+}
+
+.console-toggle {
+    color: rgb(192, 192, 192);
+    font-size: 12px;
+}
+
+.console-text-field {
+    background-color: rgba(48, 48, 48, 0.5);
+    border-color: rgb(128, 128, 128);
+    border-width: 1px;
+    color: rgb(192, 192, 192);
+    padding: 2px 4px;
+    border-radius: 2px;
+}
+
+.console-text-field:focus {
+    border-color: rgb(96, 150, 255);
+}
+
+.console-foldout {
+    color: rgb(192, 192, 192);
+    font-size: 12px;
+    margin: 2px;
+}
+
+.console-foldout > .unity-foldout__toggle {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.console-foldout > .unity-foldout__toggle > .unity-toggle__checkmark {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.console-color-field {
+    margin: 2px;
+}
+
+/* =========================== */
+/* BUTTON-STYLE TOGGLES       */
+/* =========================== */
+
+.button-style-toggle {
+    margin: 0 2px;
+    height: 24px;
+    background-color: rgba(80, 80, 80, 0.5);
+    border-color: rgb(128, 128, 128);
+    border-width: 1px;
+    border-radius: 2px;
+    padding: 2px 6px;
+    align-items: center;
+    justify-content: center;
+    color: rgb(192, 192, 192);
+}
+
+.button-style-toggle:hover {
+    background-color: rgba(112, 112, 112, 0.5);
+}
+
+.button-style-toggle:checked {
+    background-color: rgba(62, 91, 144, 0.5);
+    border-color: rgb(160, 160, 160);
+    color: rgb(255, 255, 255);
+}
+
+/* Hide toggle checkmark completely */
+.button-style-toggle > .unity-toggle__checkmark {
+    display: none;
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.button-style-toggle > .unity-toggle__input {
+    display: none;
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/* =========================== */
+/* ICON STYLES                 */
+/* =========================== */
+
+.button-icon {
+    width: 16px;
+    height: 16px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.log-icon {
+    background-image: resource('Textures/log');
+}
+
+.warning-icon {
+    background-image: resource('Textures/warning');
+}
+
+.error-icon {
+    background-image: resource('Textures/error');
+}
+
+.pause-icon {
+    background-image: resource('Textures/pause');
+}
+
+.pause-play-icon {
+    background-image: resource('Textures/pause_play');
+}
+
+.step-icon {
+    background-image: resource('Textures/step');
+}
+
+.step-play-icon {
+    background-image: resource('Textures/step_play');
+}
+
+/* =========================== */
+/* SECTION STYLES              */
+/* =========================== */
+
+.section-title {
+    color: rgb(220, 220, 220);
+    font-size: 14px;
+    -unity-font-style: bold;
+    margin-bottom: 8px;
+}
+
+/* =========================== */
+/* SEPARATOR STYLES            */
+/* =========================== */
+
+.separator-line {
+    height: 2px;
+    background-color: rgba(64, 64, 64, 0.5);
+    margin: 8px;
+}
+
+/* =========================== */
+/* COMMAND CONTROLS            */
+/* =========================== */
+
+/* Ensure command bool toggle checkmarks are visible */
+.command-bool-toggle > .unity-toggle__checkmark {
+    background-color: rgba(0, 0, 0, 0) !important;
+    border-color: rgb(100, 100, 100);
+    border-width: 1px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Show checkmark when checked using CSS-only approach */
+.command-bool-toggle:checked > .unity-toggle__checkmark {
+    background-color: rgba(60, 120, 200, 1.0) !important;
+    border-color: rgb(80, 140, 220);
+}
+
+
+/* =========================== */
+/* UTILITY CLASSES             */
+/* =========================== */
+
+.bold-text {
+    -unity-font-style: bold;
+}
+
+.center-text {
+    -unity-text-align: middle-center;
+}
+
+.flex-row {
+    flex-direction: row;
+}
+
+.flex-column {
+    flex-direction: column;
+}
+
+.space-small {
+    margin: 4px;
+}
+
+.space-medium {
+    margin: 8px;
+}
+
+.space-large {
+    margin: 16px;
+}
+
+.hidden {
+    display: none;
+}
+
+/* =========================== */
+/* PLACEHOLDER TEXT            */
+/* =========================== */
+
+.placeholder-text {
+    color: rgb(128, 128, 128);
+}
+
+/* Placeholder text styling for DOM structure */
+.placeholder-text TextInput TextElement {
+    color: rgb(128, 128, 128) !important;
+}
+
+.placeholder-text .unity-text-element {
+    color: rgb(128, 128, 128) !important;
+}
+
+.placeholder-text > .unity-text-field__input {
+    color: rgb(128, 128, 128);
+}
+
+.placeholder-text .unity-text-input {
+    color: rgb(128, 128, 128) !important;
+}
+
+/* =========================== */
+/* GLOBAL ELEMENT OVERRIDES   */
+/* =========================== */
+
+/* Global text element styling for runtime */
+Label {
+    color: rgb(192, 192, 192);
+    font-size: 12px;
+}
+
+FloatField {
+    background-color: rgba(48, 48, 48, 0.5);
+    color: rgb(192, 192, 192);
+    border-color: rgb(128, 128, 128);
+    border-width: 1px;
+    font-size: 12px;
+    border-radius: 2px;
+}
+
+FloatField .unity-base-text-field__input {
+    background-color: rgba(48, 48, 48, 0.5) !important;
+    color: rgb(192, 192, 192) !important;
+}
+
+IntegerField {
+    background-color: rgba(48, 48, 48, 0.5);
+    color: rgb(192, 192, 192);
+    border-color: rgb(128, 128, 128);
+    font-size: 12px;
+    border-radius: 2px;
+}
+
+IntegerField .unity-base-text-field__input {
+    background-color: rgba(48, 48, 48, 0.5) !important;
+    color: rgb(192, 192, 192) !important;
+}
+
+Toggle {
+    color: rgb(192, 192, 192);
+    font-size: 12px;
+}
+
+TextField {
+    background-color: rgba(48, 48, 48, 0.5);
+    color: rgb(192, 192, 192);
+    border-color: rgb(128, 128, 128);
+    font-size: 12px;
+    border-radius: 2px;
+}
+
+/* TextField internal elements */
+TextField .unity-base-text-field__input {
+    background-color: transparent;
+    color: rgb(192, 192, 192);
+    border-width: 0;
+}
+
+TextField .unity-text-input {
+    background-color: transparent;
+    color: rgb(192, 192, 192);
+    border-width: 0;
+}

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal class CommandView : ConsoleViewAbstract
     {
@@ -14,7 +14,7 @@ namespace SPlugin
         private VisualElement _rootElement;
         private VisualElement _noCommandsMessage;
         private VisualElement _commandsInterface;
-        private VisualElement _categoryTabs;
+        private VisualElement _categoryTabsScroll;
         private VisualElement _commandsList;
 
         private string _selectedCategoryName = string.Empty;
@@ -59,9 +59,9 @@ namespace SPlugin
             }
 
             // Get references to UI elements
-            _noCommandsMessage = _rootElement.Q<VisualElement>("no-commands-message");
-            _commandsInterface = _rootElement.Q<VisualElement>("commands-interface");
-            _categoryTabs = _rootElement.Q<VisualElement>("category-tabs");
+            _noCommandsMessage = _rootElement.Q<VisualElement>("no-commands-message-root");
+            _commandsInterface = _rootElement.Q<VisualElement>("commands-interface-root");
+            _categoryTabsScroll = _rootElement.Q<VisualElement>("category-tabs-scroll");
             _commandsList = _rootElement.Q<VisualElement>("commands-list");
         }
 
@@ -118,7 +118,7 @@ namespace SPlugin
             UpdateCommandsList();
         }
 
-        private void ShowNoCommandsMessage(string message)
+        private void ShowNoCommandsMessage(string message_)
         {
             if (_noCommandsMessage != null)
             {
@@ -126,7 +126,7 @@ namespace SPlugin
                 var titleLabel = _noCommandsMessage.Q<Label>("no-commands-title");
                 if (titleLabel != null)
                 {
-                    titleLabel.text = message;
+                    titleLabel.text = message_;
                 }
             }
             
@@ -151,9 +151,9 @@ namespace SPlugin
 
         private void UpdateCategoryTabs()
         {
-            if (_categoryTabs == null || CurrentAppRef == null) return;
+            if (_categoryTabsScroll == null || CurrentAppRef == null) return;
 
-            _categoryTabs.Clear();
+            _categoryTabsScroll.Clear();
             _categoryButtons.Clear();
 
             var commandsByCategory = CurrentAppRef.commandCollection.commandsByCategory;
@@ -174,7 +174,7 @@ namespace SPlugin
                     categoryButton.AddToClassList("selected");
                 }
 
-                _categoryTabs.Add(categoryButton);
+                _categoryTabsScroll.Add(categoryButton);
                 _categoryButtons.Add(categoryButton);
                 
                 // Bind click event directly
@@ -184,17 +184,17 @@ namespace SPlugin
             }
         }
 
-        private void SelectCategory(string categoryName)
+        private void SelectCategory(string categoryName_)
         {
-            if (_selectedCategoryName == categoryName) return;
+            if (_selectedCategoryName == categoryName_) return;
 
-            _selectedCategoryName = categoryName;
+            _selectedCategoryName = categoryName_;
             
             // Update button states
             foreach (var button in _categoryButtons)
             {
                 button.RemoveFromClassList("selected");
-                if (button.text == categoryName)
+                if (button.text == categoryName_)
                 {
                     button.AddToClassList("selected");
                 }
@@ -234,13 +234,13 @@ namespace SPlugin
             }
         }
 
-        private VisualElement CreateCommandElement(CommandItemAbstract commandItem)
+        private VisualElement CreateCommandElement(CommandItemAbstract commandItem_)
         {
             var commandContainer = new VisualElement();
             commandContainer.AddToClassList("command-item");
 
             // Command name
-            var nameLabel = new Label(commandItem.CommandName);
+            var nameLabel = new Label(commandItem_.CommandName);
             nameLabel.AddToClassList("command-name-label");
             nameLabel.style.minWidth = 200;
             commandContainer.Add(nameLabel);
@@ -251,23 +251,23 @@ namespace SPlugin
             valueContainer.AddToClassList("command-value-container");
 
             // Create control using the command item's own method
-            VisualElement valueControl = commandItem.CreateUIToolkitControl();
+            VisualElement valueControl = commandItem_.CreateUIToolkitControl();
             if (valueControl != null)
             {
                 valueContainer.Add(valueControl);
                 
                 // Schedule event binding after the control is added to the hierarchy
                 valueContainer.schedule.Execute(() => {
-                    commandItem.BindUIToolkitEvents(valueControl);
+                    commandItem_.BindUIToolkitEvents(valueControl);
                 });
             }
 
             commandContainer.Add(valueContainer);
 
             // Tooltip
-            if (!string.IsNullOrEmpty(commandItem.ToolTip))
+            if (!string.IsNullOrEmpty(commandItem_.ToolTip))
             {
-                commandContainer.tooltip = commandItem.ToolTip;
+                commandContainer.tooltip = commandItem_.ToolTip;
             }
 
             return commandContainer;

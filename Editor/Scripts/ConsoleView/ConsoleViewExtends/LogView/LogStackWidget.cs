@@ -1,10 +1,11 @@
 // 
 // Copyright 2015 https://github.com/hope1026
 
+using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal class LogStackWidget
     {
@@ -63,31 +64,18 @@ namespace SPlugin
                     {
                         var stackLabel = new Label(displayText);
                         stackLabel.AddToClassList("stack-trace-line");
-                        
-                        // Make it clickable if there's a file path
-                        if (!string.IsNullOrEmpty(stackContext.FilePath))
-                        {
-                            stackLabel.AddToClassList("stack-trace-clickable");
-                            
-                            // Add double-click handler to open source file
-                            stackLabel.RegisterCallback<MouseDownEvent>(evt_ => {
-                                if (evt_.clickCount == 2 && evt_.button == 0)
-                                {
-                                    LogItem.OpenStackTraceFile(stackContext.FilePath, stackContext.LineNumber);
-                                    evt_.StopPropagation();
-                                }
-                            });
-                            
-                            // Add right-click context menu
-                            stackLabel.RegisterCallback<MouseUpEvent>(evt_ => {
-                                if (evt_.button == 1) // Right click
-                                {
-                                    ShowStackTraceContextMenu(stackContext);
-                                    evt_.StopPropagation();
-                                }
-                            });
-                        }
-                        
+
+                        stackLabel.AddToClassList("stack-trace-clickable");
+
+                        // Store stack context for context menu
+                        stackLabel.userData = stackContext;
+
+                        // Add double-click handler to open source file
+                        stackLabel.RegisterCallback<MouseDownEvent>(OnStackLabelMouseDown);
+
+                        // Add context menu manipulator
+                        stackLabel.AddManipulator(new ContextualMenuManipulator(BuildStackTraceMenu));
+
                         _stackTraceScroll.Add(stackLabel);
                     }
                 }
@@ -124,9 +112,9 @@ namespace SPlugin
             
             // Remove <a> tags but keep the content
             int startIndex = 0;
-            while ((startIndex = result.IndexOf("<a ", startIndex)) != -1)
+            while ((startIndex = result.IndexOf("<a ", startIndex, StringComparison.Ordinal)) != -1)
             {
-                int endIndex = result.IndexOf(">", startIndex);
+                int endIndex = result.IndexOf(">", startIndex, StringComparison.Ordinal);
                 if (endIndex != -1)
                 {
                     result = result.Remove(startIndex, endIndex - startIndex + 1);
@@ -143,33 +131,48 @@ namespace SPlugin
             return result;
         }
 
-        private void ShowStackTraceContextMenu(LogItem.StackContext stackContext_)
+        private void OnStackLabelMouseDown(MouseDownEvent evt_)
         {
-            var menu = new UnityEditor.GenericMenu();
-            
-            if (System.IO.File.Exists(stackContext_.FilePath))
+            if (evt_.clickCount == 2 && evt_.button == 0)
             {
-                menu.AddItem(new UnityEngine.GUIContent("Open Source File"), false, () => {
-                    LogItem.OpenStackTraceFile(stackContext_.FilePath, stackContext_.LineNumber);
-                });
+                if ((evt_.target as VisualElement)?.userData is LogItem.StackContext stackContext)
+                {
+                    LogItem.OpenStackTraceFile(stackContext.FilePath, stackContext.LineNumber);
+                    evt_.StopPropagation();
+                }
+            }
+        }
+
+        private void BuildStackTraceMenu(ContextualMenuPopulateEvent evt_)
+        {
+            if ((evt_.target as VisualElement)?.userData is not LogItem.StackContext stackContext) return;
+
+            evt_.menu.MenuItems().Clear();
+
+            if (System.IO.File.Exists(stackContext.FilePath))
+            {
+                evt_.menu.AppendAction("Open Source File", 
+                    _ => LogItem.OpenStackTraceFile(stackContext.FilePath, stackContext.LineNumber), 
+                    DropdownMenuAction.AlwaysEnabled);
             }
             else
             {
-                menu.AddDisabledItem(new UnityEngine.GUIContent("Open Source File"));
+                evt_.menu.AppendAction("Open Source File", 
+                    _ => { }, 
+                    DropdownMenuAction.AlwaysDisabled);
             }
-            
-            menu.AddItem(new UnityEngine.GUIContent("Copy Selected"), false, () => {
-                UnityEditor.EditorGUIUtility.systemCopyBuffer = stackContext_.OriginalStackString;
-            });
-            
-            menu.AddItem(new UnityEngine.GUIContent("Copy All"), false, () => {
-                if (_selectedLogItem != null)
-                {
-                    UnityEditor.EditorGUIUtility.systemCopyBuffer = _selectedLogItem.StackString;
-                }
-            });
-            
-            menu.ShowAsContext();
+
+            evt_.menu.AppendAction("Copy Selected", 
+                _ => UnityEditor.EditorGUIUtility.systemCopyBuffer = stackContext.OriginalStackString, 
+                DropdownMenuAction.AlwaysEnabled);
+
+            evt_.menu.AppendAction("Copy All", 
+                _ => {
+                    if (_selectedLogItem != null)
+                        UnityEditor.EditorGUIUtility.systemCopyBuffer = _selectedLogItem.StackString;
+                }, 
+                DropdownMenuAction.AlwaysEnabled);
         }
+
     }
 }

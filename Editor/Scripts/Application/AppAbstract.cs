@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal abstract class AppAbstract
     {

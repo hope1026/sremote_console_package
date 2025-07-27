@@ -1,0 +1,299 @@
+.command-view {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.no-commands-message-root {
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    display: none;
+    align-self: stretch;
+    width: 100%;
+    height: 100%;
+}
+
+.no-commands-title {
+    font-size: 16px;
+    color: rgb(128, 128, 128);
+    -unity-text-align: middle-center;
+    /* Font handled programmatically via UIResourceHelper */
+    justify-content: center;
+    align-self: center;
+    align-items: center;
+    width: 100%;
+    height: auto;
+}
+
+.commands-interface-root {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    width: 100%;
+    height: 100%;
+}
+
+.category-tabs-container {
+    background-color: rgba(48, 48, 48, 0.5);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(96, 96, 96);
+    padding: 4px;
+    min-height: 36px;
+}
+
+.category-tabs {
+    pointer-events: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    overflow: hidden;
+    align-content: flex-start;
+}
+
+.category-tab-button {
+    font-size: 12px;
+    -unity-text-align: middle-center;
+    height: 40px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    padding: 5px 10px;
+    background-color: rgba(80, 80, 80, 0.5);
+    border-color: rgb(128, 128, 128);
+    border-width: 1px;
+    border-radius: 3px;
+    color: rgb(192, 192, 192);
+}
+
+.category-tab-button:hover {
+    background-color: rgba(100, 100, 100, 0.5);
+}
+
+.category-tab-button.selected {
+    background-color: rgba(62, 125, 231, 0.5);
+    color: rgb(255, 255, 255);
+    border-color: rgb(100, 150, 255);
+}
+
+.category-tab-button.selected:hover {
+    background-color: rgba(80, 140, 240, 0.5);
+}
+
+.commands-list-container {
+    flex-grow: 1;
+    padding: 8px;
+    pointer-events: auto;
+}
+
+.commands-scroll {
+    pointer-events: auto;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.commands-list {
+    pointer-events: auto;
+}
+
+.commands-header {
+    flex-direction: row;
+    background-color: rgba(64, 64, 64, 0.5);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(96, 96, 96);
+    padding: 4px 8px;
+    margin-bottom: 4px;
+}
+
+.command-header-name {
+    min-width: 200px;
+    color: rgb(220, 220, 220);
+    font-size: 14px;
+    -unity-font-style: bold;
+    /* Font handled programmatically via UIResourceHelper */
+}
+
+.command-header-value {
+    flex-grow: 1;
+    font-size: 14px;
+    color: rgb(220, 220, 220);
+    -unity-font-style: bold;
+    /* Font handled programmatically via UIResourceHelper */
+}
+
+.command-item {
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 8px;
+    margin: 2px 0;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    min-height: 28px;
+    height: auto;
+    /* Font handled programmatically via UIResourceHelper */
+}
+
+.command-name-label {
+    min-width: 200px;
+    font-size: 14px;
+    color: rgb(192, 192, 192);
+    /* Font handled programmatically via UIResourceHelper */
+}
+
+.command-value-container {
+    flex-grow: 1;
+    min-height: 24px;
+    height: auto;
+}
+
+.command-apply-button {
+    margin-left: 4px;
+    min-width: 60px;
+    max-width: 80px;
+    min-height: 20px;
+    height: auto;
+    padding: 2px 6px;
+    font-size: 11px;
+    color: rgb(230, 230, 230);
+    display: none;
+}
+
+.command-apply-button > Label {
+    font-size: 11px;
+    color: rgb(230, 230, 230);
+}
+
+/* Command input field styling for better contrast and consistency */
+/* Target DoubleField input element */
+.command-value-container .unity-base-text-field__input {
+    background-color: rgba(32, 32, 32, 0.5) !important;
+    color: rgb(240, 240, 240) !important;
+    border-color: rgb(128, 128, 128) !important;
+    font-size: 12px !important;
+    min-height: 20px !important;
+    height: 22px !important;
+    border-radius: 2px !important;
+    align-self: stretch !important;
+    -unity-text-align: middle-left !important;
+    padding: 2px 4px !important;
+}
+
+.command-value-container .unity-base-text-field__input:focus {
+    border-color: rgb(96, 150, 255) !important;
+    background-color: rgba(40, 40, 40, 0.5) !important;
+    color: rgb(255, 255, 255) !important;
+}
+
+.command-value-container .unity-base-text-field__input:hover {
+    background-color: rgba(36, 36, 36, 0.5) !important;
+    border-color: rgb(144, 144, 144) !important;
+}
+
+/* Target TextElement inside DoubleInput for text color */
+.command-value-container .unity-text-element {
+    color: rgb(240, 240, 240) !important;
+    font-size: 12px !important;
+}
+
+/* Alternative selector for text input fields */
+.command-value-container .unity-text-field__input {
+    background-color: rgba(32, 32, 32, 0.5) !important;
+    color: rgb(240, 240, 240) !important;
+    border-color: rgb(128, 128, 128) !important;
+    font-size: 12px !important;
+    min-height: 20px !important;
+    height: 22px !important;
+    border-radius: 2px !important;
+    align-self: stretch !important;
+    -unity-text-align: middle-left !important;
+    padding: 2px 4px !important;
+}
+
+.command-value-container .unity-text-field__input:focus {
+    border-color: rgb(96, 150, 255) !important;
+    background-color: rgba(40, 40, 40, 0.5) !important;
+    color: rgb(255, 255, 255) !important;
+}
+
+/* Target unity-text-input class specifically */
+.command-value-container .unity-text-input {
+    flex-grow: 1;
+    background-color: rgba(32, 32, 32, 0.5) !important;
+    color: rgb(240, 240, 240) !important;
+    border-color: rgb(128, 128, 128) !important;
+    font-size: 12px !important;
+    min-height: 20px !important;
+    height: 22px !important;
+    border-radius: 2px !important;
+    align-self: stretch !important;
+    -unity-text-align: middle-left !important;
+    padding: 2px 4px !important;
+}
+
+.command-value-container .unity-text-input:focus {
+    border-color: rgb(96, 150, 255) !important;
+    background-color: rgba(40, 40, 40, 0.5) !important;
+    color: rgb(255, 255, 255) !important;
+}
+
+/* =========================== */
+/* COMMAND CONTROL CONTAINERS  */
+/* =========================== */
+
+/* Common container styling for all command controls */
+.command-control-container {
+    flex-direction: row;
+    align-items: center;
+    align-content: flex-start;
+    justify-content: flex-start;
+    min-height: 24px;
+    height: auto;
+    width: 100%;
+}
+
+/* Common field styling for all input types */
+.command-input-field {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 22px;
+    height: auto;
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+}
+
+/* =========================== */
+/* COMMAND BOOL TOGGLE         */
+/* =========================== */
+
+.command-bool-toggle {
+    flex-grow: 1;
+    align-self: center;
+    min-height: 22px;
+    height: auto;
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+}
+
+/* Command bool toggle input styling */
+.command-bool-toggle > .unity-toggle__input {
+    min-width: 16px;
+    min-height: 16px;
+    width: 16px;
+    height: 16px;
+    background-color: rgba(76, 76, 76, 0.5);
+    border-color: rgb(153, 153, 153);
+    border-width: 1px;
+}
+
+/* Command bool toggle checkmark styling */
+.command-bool-toggle > .unity-toggle__checkmark {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+}
+
+/* Command bool toggle text styling */
+.command-bool-toggle > Label {
+    color: rgb(230, 230, 230);
+}

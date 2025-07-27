@@ -4,7 +4,7 @@
 using System;
 using SPlugin.FrameWork.Network;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal class RemoteApp : AppAbstract
     {

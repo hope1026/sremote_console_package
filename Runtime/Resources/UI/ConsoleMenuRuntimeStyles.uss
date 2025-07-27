@@ -1,0 +1,44 @@
+.menu-container {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    height: auto;
+    min-width: 100px;
+    align-items: flex-start;
+}
+
+.menu-button {
+    flex-grow: 1;
+    font-size: 20px;
+    min-width: 100px;
+    height: 60px;
+    padding: 2px;
+    margin-left: 2px;
+    margin-right: 2px;
+    background-color: rgba(76, 76, 76, 0.5);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-left-color: rgb(128, 128, 128);
+    border-right-color: rgb(128, 128, 128);
+    border-top-color: rgb(128, 128, 128);
+    border-bottom-color: rgb(128, 128, 128);
+    color: white;
+    -unity-text-align: middle-center;
+    -unity-font-style: normal;
+    -unity-font-definition: initial;
+    /* Font handled programmatically via UIResourceHelper */
+}
+
+.menu-button--selected {
+    background-color: rgba(102, 153, 204, 0.5);
+    color: white;
+}
+
+.spacer {
+    flex-grow: 1;
+}
+
+.menu-container {
+}

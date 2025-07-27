@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using Object = System.Object;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal static class ColorUtility
     {

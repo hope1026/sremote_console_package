@@ -12,7 +12,7 @@ using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 
-namespace SPlugin.RemoteConsole.Editor
+namespace SPlugin.RemoteConsole.Editor.RemoteConsole.Editor
 {
     internal class LinkXmlMergeBuildProcess : IPreprocessBuildWithReport, IPostprocessBuildWithReport
     {

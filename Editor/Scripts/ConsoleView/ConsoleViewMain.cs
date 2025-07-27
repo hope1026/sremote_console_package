@@ -1,12 +1,11 @@
 ﻿// 
 // Copyright 2015 https://github.com/hope1026
 
-using System;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace SPlugin
+namespace SPlugin.RemoteConsole.Editor
 {
     internal class ConsoleViewMain
     {
@@ -16,7 +15,6 @@ namespace SPlugin
         private SystemMessageView _systemMessageView = null;
 
         private string _notifyMessage = string.Empty;
-        private bool _forceChangeWindow = false;
         private readonly ConsoleViewAbstract[] _consoleViews = new ConsoleViewAbstract[ConsoleViewTypeUtil.COUNT];
         private ConsoleViewType _currentConsoleViewType = ConsoleViewType.LOG;
         public ConsoleViewType CurrentConsoleViewType => _currentConsoleViewType;
@@ -54,7 +52,7 @@ namespace SPlugin
         public void Initialize(SConsoleEditorWindow editorWindow_)
         {
             _consoleEditorWindow = editorWindow_;
-            _consoleEditorWindow.position.Set(_consoleEditorWindow.position.x, _consoleEditorWindow.position.y, ConsoleViewLayoutDefines.windowSize.x, ConsoleViewLayoutDefines.windowSize.y);
+            //_consoleEditorWindow.position.Set(_consoleEditorWindow.position.x, _consoleEditorWindow.position.y);
             _consoleEditorWindow.wantsMouseMove = true;
             _consoleEditorWindow.titleContent = new GUIContent("SConsole");
 
@@ -75,7 +73,7 @@ namespace SPlugin
 
             ShowView(_currentConsoleViewType);
 
-            RemoteConsoleLocalEditorBridge.Instance.RegisterUpdateInEditorDelegate();
+            RemoteConsoleToLocalApplicationBridge.Instance.RegisterUpdateInEditorApplicationDelegate();
         }
 
         public void InitializeUI(VisualElement container_)
@@ -144,7 +142,10 @@ namespace SPlugin
             // Clear current UI view
             if (_currentUIToolkitView != null)
             {
-                _uiToolkitContainer.Remove(_currentUIToolkitView);
+                if( _currentUIToolkitView.parent == _uiToolkitContainer)
+                {
+                    _uiToolkitContainer.Remove(_currentUIToolkitView);
+                }
                 _currentUIToolkitView = null;
             }
 
@@ -177,7 +178,7 @@ namespace SPlugin
 
         public void UpdateCustom()
         {
-            RemoteConsoleLocalEditorBridge.Instance.UpdateInEditor();
+            RemoteConsoleToLocalApplicationBridge.Instance.UpdateInEditor();
             AppManager.Instance.UpdateCustom();
             _consoleViews[(int)_currentConsoleViewType]?.UpdateCustom();
             
@@ -199,20 +200,6 @@ namespace SPlugin
             {
                 EditorUtility.DisplayDialog("Notify", _notifyMessage, "ok");
                 _notifyMessage = string.Empty;
-            }
-        }
-
-        private void ChangeWindowSizeIfChangedWindowEditor()
-        {
-            if (null != _consoleEditorWindow)
-            {
-                if (float.Epsilon < Math.Abs(ConsoleViewLayoutDefines.windowSize.x - _consoleEditorWindow.position.width) ||
-                    float.Epsilon < Math.Abs(ConsoleViewLayoutDefines.windowSize.y - _consoleEditorWindow.position.height) ||
-                    true == _forceChangeWindow)
-                {
-                    ConsoleViewLayoutDefines.OnChangeWindowSize(_consoleEditorWindow.position.width, _consoleEditorWindow.position.height);
-                    _forceChangeWindow = false;
-                }
             }
         }
 
@@ -241,16 +228,6 @@ namespace SPlugin
             {
                 _consoleEditorWindow.ShowNotification(new GUIContent(message_), 2f);
             }
-        }
-
-        public string GetEditorWindowName()
-        {
-            if (_consoleEditorWindow != null)
-            {
-                return _consoleEditorWindow.name;
-            }
-
-            return string.Empty;
         }
 
         public void AddSystemLogData(LogItem logData_)
